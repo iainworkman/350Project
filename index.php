@@ -43,25 +43,15 @@
         <nav id="menu">
             <ul>
                 <li>
-                    <span>User Zones</span>
-                    <ul>
-                        <li class="img">
-                            <a href="#/" id="UofS">
-                                <img src="http://lorempixel.com/50/50/people/1/" />
-                                University of Saskatchewan
-                            </a>
-                        </li>
+                    <span>My Zones</span>
+                    <ul id="userZonesList">
+                        
                     </ul>
                 </li>
                 <li>
                     <span>Global Zones</span>                          
-                    <ul>
-                        <li class="img">
-                            <a href="#/" id="SaskAirport">
-                                <img src="http://lorempixel.com/50/50/people/5/" />
-                                Saskatoon Airport
-                            </a>
-                        </li>
+                    <ul id = "globalZonesList">
+                        
                     </ul>
                 </li>
             </ul>
@@ -85,8 +75,8 @@
             
             function initialize() {
                 var mapOptions = {
-                    zoom: 8,
-                    center: new google.maps.LatLng(-34.397, 150.644)
+                    zoom: 14,
+                    center: new google.maps.LatLng(52.1153705, -106.6166251)
                 };
                 
                 map = new google.maps.Map(document.getElementById('map-container'),
