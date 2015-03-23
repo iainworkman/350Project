@@ -98,9 +98,33 @@
                     }
                 });
 
-                drawingManager.setMap(map);            
+                drawingManager.setMap(map);  
+
+				//This will grab the coordinates of a region upon creation as well as well as allow grabbing them on edit.
+				google.maps.event.addListener(drawingManager, "overlaycomplete", function(event){
+					overlayMouseUpListener(event.overlay);
+					overlayMouseDownListener(event.overlay);
+					//console.debug(overlay);
+					//alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+					
+				});
             }
-            
+			
+			//this will grab the coordinates from the drawing manager on mouse up.
+			function overlayMouseUpListener(overlay) {
+				google.maps.event.addListener(overlay,"mouseup", function(event) {
+					console.debug(overlay);//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
+				});
+			}
+			
+			
+			//This will grab the coordinates from the drawing manager on mouse down. This is to find the currently saved regions that 
+			//these points correspond to in order to change them later.
+			function overlayMouseDownListener(overlay) {
+				google.maps.event.addListener(overlay,"mousedown", function(event) {
+					console.debug(overlay);//alert("This is in the overlay mouse down listener; " + overlay.getPath().getArray());
+				});
+			}
             google.maps.event.addDomListener(window, 'load', initialize);
         </script>
         <script type="text/javascript">
