@@ -7,6 +7,9 @@ polygon id to the polygon.
 
 IDEA: It would be nice to attach listeners to this class to implicitly handle the saving, updating, and removal
 	of its polygon.
+
+Possible Issue:  this file depends on the google polygon api, so it is possible that it may not load correctly unless we follow the solution in this link.
+http://stackoverflow.com/questions/4634644/how-to-include-js-file-in-another-js-file
 **/
 
 /** defines the class region. You can create an instance of region using
@@ -41,6 +44,34 @@ function Region (polygon, owner)
 	//I don't think this style is good enough, because the polygon could be changed outside of this class.
 	//As a result, ensuring the appropriate methods are called outside of this class may be a better solution.
 	//this.hasChanged_ = false;
+	
+	
+	//What the polygon looks like when it is a universal type, also note that it is not editable.
+	if (this.owner_ == "universal")
+	{
+		polygon.setOptions(polygonOptions: {
+                        editable: false,
+                        fillColor: 'RED',
+						draggable: false,
+						clickable: false,
+                        strokeColor: 'BLACK'
+                    });
+	}
+	
+	//What the polygon looks like when it belongs to a user, note that it is editable.
+	else
+	{
+		polygon.setOptions(polygonOptions: {
+			editable: true,
+			fillColor: 'GREEN',
+			draggable: true,
+			clickable: true,
+			strokeColor: 'PURPLE'
+			
+		});
+	}
+	
+	
 }
 
 function isActive()
