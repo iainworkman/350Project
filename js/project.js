@@ -39,7 +39,7 @@ var modal = (function() {
 
     // Open the modal
 		method.open = function (settings) {
-		$('body').append($overlay,$modal);
+		$('primary-container').append($overlay,$modal);
 		$content.empty().append(settings.content);
 
 		$modal.css({
