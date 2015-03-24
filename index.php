@@ -20,6 +20,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+ 
     </head>
     <body>        
         <div class="container-fluid">
@@ -56,6 +57,8 @@
                 </li>
             </ul>
 		</nav>
+		
+			
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         
@@ -68,6 +71,7 @@
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
         <!-- Include the GoogleMaps Drawing Library -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+		<script type="text/javascript" src="js/project.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script>
             var map;
@@ -126,6 +130,9 @@
 				});
 			}
             google.maps.event.addDomListener(window, 'load', initialize);
+			
+			modal.open({content: "Hello World"});
+
         </script>
         <script type="text/javascript">
             $(function() {
