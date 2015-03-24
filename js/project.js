@@ -9,15 +9,15 @@ var modal = (function() {
 	$cancelButton;
 	
 	//Append to the html
-	$overlay = $('<div id="overlay"></div>');
-	$modal = $('<div id="modal"></div>');
-	$content = $('<div id="content"></div>');
-	$saveButton = $('<a id = "saveButton" href="#">save</a>');
-	$cancelButton = $('<a id="cancelButton" gref = "#">cancel</a>');
+	$overlay = $('save-region-modal');
+	$modal = $('modal-dialog');
+	$content = $('modal-content');
+	$saveButton = $('save-button');
+	$cancelButton = $('close-button');
 	
-	$modal.hide();
+	//$modal.hide();
 	$overlay.hide();
-	$modal.append($content, $saveButton, $cancelButton);
+	//$modal.append($content, $saveButton, $cancelButton);
 	
 	$(document).ready(function(){
 		//$('body').append($overlay,$modal);
@@ -39,7 +39,6 @@ var modal = (function() {
 
     // Open the modal
 		method.open = function (settings) {
-		$('primary-container').append($overlay,$modal);
 		$content.empty().append(settings.content);
 
 		$modal.css({
@@ -61,8 +60,6 @@ var modal = (function() {
 		$overlay.hide();
 		$content.empty();
 		$(window).unbind('resize.modal');
-		$overlay.remove();
-		$modal.remove();
 
 	};
 	

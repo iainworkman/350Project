@@ -48,7 +48,7 @@
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </button>
                     </span>
-				   <button type="button" class="btn btn-success" style="margin-top:7px" data-toggle="modal" data-target="#add-contact-modal">
+				   <button type="button" class="btn btn-success" style="margin-top:7px" data-toggle="modal" data-target="#save-region-modal">
                         <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"  style="color:white;"></span>
                     </button>
                 </div><!-- /input-group -->
@@ -61,8 +61,8 @@
             </div>
         <!-- Modal -->
         <div id="save-region-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="add-modal-label" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
+            <div id="modal-dialog" class="modal-dialog">
+                <div id="modal-content" class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:white;">&times;  </button>
                         <h4 class="modal-title" id="add-modal-label">Add Contact</h4>
@@ -71,92 +71,15 @@
                     <div id="add-contact-modal-body" class="modal-body" style="max-height: 65vh;">
                         <form class="form-horizontal">
                             <div class="form-group">
-                                <label for="add-contact-first-name" class="col-sm-3 control-label">First Name</label>
+                                <label for="region-name" class="col-sm-3 control-label">Region Name</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-first-name" placeholder="First Name" />
+                                    <input type="text" class="form-control" id="region-name" placeholder="First Name" />
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label for="add-contact-last-name" class="col-sm-3 control-label">Last Name</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-last-name" placeholder="Last Name"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-company" class="col-sm-3 control-label">Company</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-company" placeholder="Company"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-phone" class="col-sm-3 control-label">Phone Number</label>
-                                <div class="col-sm-9">
-                                    <input type="tel" class="form-control" id="add-contact-phone" placeholder="Phone Number"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-email" class="col-sm-3 control-label">Email</label>
-                                <div class="col-sm-9">
-                                    <input type="email" class="form-control" id="add-contact-email" placeholder="Email"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-url" class="col-sm-3 control-label">URL</label>
-                                <div class="col-sm-9">
-                                    <input type="url" class="form-control" id="add-contact-url" placeholder="Url"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-birthday" class="col-sm-3 control-label">Birthday</label>
-                                <div class="col-sm-9">
-                                    <input type="date" class="form-control" id="add-contact-birthday" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-date" class="col-sm-3 control-label">Date</label>
-                                <div class="col-sm-9">
-                                    <input type="date" class="form-control" id="add-contact-date" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-buidling-number" class="col-sm-3 control-label">Building #</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-buidling-number" placeholder="House or Building Number"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-street-name" class="col-sm-3 control-label">Street Name</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-street-name" placeholder="Street Name"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-town-name" class="col-sm-3 control-label">Town/City</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-town-name" placeholder="Town/City"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-region" class="col-sm-3 control-label">Region</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-region" placeholder="Region or Province"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-country" class="col-sm-3 control-label">Country</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-country" placeholder="Country"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="add-contact-post-code" class="col-sm-3 control-label">Post Code</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="add-contact-post-code" placeholder="Postal Code"/>
-                                </div>
-                            </div>
+                            
                             <div class="form-group" style="padding-left:30px; padding-right:20px;">
-                                <label for="add-contact-notes" class="control-label">Notes</label>
-                                <textarea id="add-contact-notes" class="form-control" rows="3"></textarea>                                   
+                                <label for="region-description" class="control-label">Description</label>
+                                <textarea id="region-description" class="form-control" rows="3"></textarea>                                   
                             </div>                                
                         </form>
                     </div>
@@ -167,8 +90,8 @@
                             </button>
                         </div>
                         <div class="form-group col-xs-10">                            
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-success">Save changes</button>
+                            <button id="close-button" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button id="save-button" type="button" class="btn btn-success">Save changes</button>
                         </div>
                     </div>
                 </div>
