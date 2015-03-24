@@ -132,7 +132,7 @@
             google.maps.event.addDomListener(window, 'load', initialize);
 			
 			modal.open({content: "Hello World"});
-
+		
         </script>
         <script type="text/javascript">
             $(function() {

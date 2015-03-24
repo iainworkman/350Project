@@ -20,7 +20,8 @@ var modal = (function() {
 	$modal.append($content, $saveButton, $cancelButton);
 	
 	$(document).ready(function(){
-		$('body').append($overlay,$modal);
+		//$('body').append($overlay,$modal);
+		//$('body').append($modal);
 	});
 	
 	// Center the modal in the viewport
@@ -38,6 +39,7 @@ var modal = (function() {
 
     // Open the modal
 		method.open = function (settings) {
+		$('body').append($overlay,$modal);
 		$content.empty().append(settings.content);
 
 		$modal.css({
@@ -59,7 +61,8 @@ var modal = (function() {
 		$overlay.hide();
 		$content.empty();
 		$(window).unbind('resize.modal');
-		
+		$overlay.remove();
+		$modal.remove();
 
 	};
 	
