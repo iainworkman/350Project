@@ -1,72 +1,38 @@
-//Modal tutorial: http://www.jacklmoore.com/notes/jquery-modal-tutorial/
+/*TODO: Implement a method to allow for the editing of polygons.
+*/
+/*This removed the currently active polygon from the map.
+*/
+function removePolygon()
+{
+	if (typeof activePolygon != 'undefined')
+	{
+		activePolygon.setMap(null);
+	}
+	else
+	{
+		alert("Active Polygon is null");
+	}
+}
 
-var modal = (function() {
-	var method = {},
-	$overlay,
-	$modal,
-	$content,
-	$saveButton,
-	$cancelButton;
-	
-	//Append to the html
-	$overlay = $('save-region-modal');
-	$modal = $('modal-dialog');
-	$content = $('modal-content');
-	$saveButton = $('save-button');
-	$cancelButton = $('close-button');
-	
-	//$modal.hide();
-	$overlay.hide();
-	//$modal.append($content, $saveButton, $cancelButton);
-	
-	$(document).ready(function(){
-		//$('body').append($overlay,$modal);
-		//$('body').append($modal);
-	});
-	
-	// Center the modal in the viewport
-    method.center = function () {
-		var top, left;
+/*This saves the activePolygon to the database upon completion.
+*/
+function saveRegion(regionName,regionDescription)
+{
 		
-		top = Math.max($(window).height() - $modal.outerHeight(), 0) / 2;
-		left = Math.max($(window).width() - $modal.outerWidth(), 0) / 2;
+		//Make the region object.
+		var region = new Region(activePolygon,"Admin");
+		region.setName(regionName);
+		region.setDescription(regionDescription);
 		
-		$modal.css({
-			top: top + $(window).scrollTop,
-			left: left + $(window).scrollLeft()
-		});
-	};
+		//debug setting the name and description.
+		alert("Region Name: " + region.getName());
+		alert("Region Description: " + region.getDescription());
+		//Add the region object to the global list of region objects.
+		
+		//Send the region object information off to the server to save to the database.
+		
+		//Retreive the region id for this region.
+		//region.setID();
+}
 
-    // Open the modal
-		method.open = function (settings) {
-		$content.empty().append(settings.content);
 
-		$modal.css({
-			width: settings.width || 'auto', 
-			height: settings.height || 'auto'
-		})
-
-		method.center();
-
-		$(window).bind('resize.modal', method.center);
-
-		$modal.show();
-		$overlay.show();
-	};
-
-    // Close the modal
-    method.close = function () {
-		$modal.hide();
-		$overlay.hide();
-		$content.empty();
-		$(window).unbind('resize.modal');
-
-	};
-	
-	$cancelButton.click(function(e) {
-		e.preventDefault();
-		method.close();
-	})
-
-    return method;
-}());

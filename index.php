@@ -44,13 +44,10 @@
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Search for...">
                     <span class="input-group-btn">
-                        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="add-contact-modal">
+                        <button class="btn btn-primary" type="button" >
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </button>
                     </span>
-				   <button type="button" class="btn btn-success" style="margin-top:7px" data-toggle="modal" data-target="#save-region-modal">
-                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"  style="color:white;"></span>
-                    </button>
                 </div><!-- /input-group -->
             </div>
             <div class="side-bar-button">
@@ -65,7 +62,7 @@
                 <div id="modal-content" class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:white;">&times;  </button>
-                        <h4 class="modal-title" id="add-modal-label">Add Contact</h4>
+                        <h4 class="modal-title" id="add-modal-label">Save Region</h4>
 
                     </div>
                     <div id="add-contact-modal-body" class="modal-body" style="max-height: 65vh;">
@@ -73,7 +70,7 @@
                             <div class="form-group">
                                 <label for="region-name" class="col-sm-3 control-label">Region Name</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="region-name" placeholder="First Name" />
+                                    <input type="text" class="form-control" id="region-name" placeholder="Region Name Here" />
                                 </div>
                             </div>
                             
@@ -85,13 +82,10 @@
                     </div>
                     <div class="modal-footer">
                         <div class="form-group col-xs-2" >
-                            <button type="button" class="btn btn-danger" style="align-self:left;">
-                                <span class="glyphicon glyphicon-trash" aria-hidden="true" style="color:white;"></span>
-                            </button>
                         </div>
                         <div class="form-group col-xs-10">                            
-                            <button id="close-button" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button id="save-button" type="button" class="btn btn-success">Save changes</button>
+                            <button id="close-button" type="button" class="btn btn-default" data-dismiss="modal" onClick="removePolygon()">Remove polygon</button>
+                            <button id="save-button" type="button" class="btn btn-success"  onClick="saveRegionGateway()">Save changes</button>
                         </div>
                     </div>
                 </div>
@@ -117,8 +111,10 @@
         <!-- Include the GoogleMaps Drawing Library -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 		<script type="text/javascript" src="js/project.js"></script>
+		<script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script>
+			var activePolygon;
             var map;
             var drawingManager;
             
@@ -151,10 +147,26 @@
 
 				//This will grab the coordinates of a region upon creation as well as well as allow grabbing them on edit.
 				google.maps.event.addListener(drawingManager, "overlaycomplete", function(event){
-					overlayMouseUpListener(event.overlay);
-					overlayMouseDownListener(event.overlay);
-					//console.debug(overlay);
-					//alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+					
+					
+					/*Because the typeof method returns object for the overlay type(which is actually our polygon object!), we must
+					check if it has a function defined called getpath, which is only available(as far as I know) for the polygon object.
+					*/
+					alert(typeof event.overlay.setOptions);
+					if (typeof event.overlay.getPath == 'function')
+					{
+						activePolygon = event.overlay;
+						overlayMouseUpListener(event.overlay);
+						overlayMouseDownListener(event.overlay);
+						//console.debug(overlay);
+						//alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+						$('#save-region-modal').modal();
+						
+					}
+					else
+					{
+						//alert("This was a position click");
+					}
 					
 				});
             }
@@ -162,6 +174,7 @@
 			//this will grab the coordinates from the drawing manager on mouse up.
 			function overlayMouseUpListener(overlay) {
 				google.maps.event.addListener(overlay,"mouseup", function(event) {
+					activePolygon = overlay;
 					console.debug(overlay);//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
 				});
 			}
@@ -171,13 +184,22 @@
 			//these points correspond to in order to change them later.
 			function overlayMouseDownListener(overlay) {
 				google.maps.event.addListener(overlay,"mousedown", function(event) {
+					activePolygon = overlay;
 					console.debug(overlay);//alert("This is in the overlay mouse down listener; " + overlay.getPath().getArray());
 				});
 			}
+			
+			function saveRegionGateway()
+			{
+				var regionName = document.getElementById('region-name').value;
+				var regionDescription = document.getElementById('region-description').value
+				$('#save-region-modal').modal('toggle');
+				saveRegion(regionName,regionDescription);
+			}
             google.maps.event.addDomListener(window, 'load', initialize);
 			
-			//This currently disables the map for some reason.
-			modal.open({content: "Hello World"});
+			
+
 		
         </script>
         <script type="text/javascript">
