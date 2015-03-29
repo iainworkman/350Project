@@ -50,7 +50,7 @@
                 </li>
                 <li>
                     <span>Global Zones</span>                          
-                    <ul id = "globalZonesList">
+                    <ul id="globalZonesList">
                         
                     </ul>
                 </li>
@@ -69,6 +69,7 @@
         <!-- Include the GoogleMaps Drawing Library -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
         <!-- Our custom code to render the Map examples -->
+        <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
         <script>
             var map;
             var drawingManager;
@@ -108,6 +109,35 @@
 					//alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
 					
 				});
+                
+                buildRegionMenuItems();
+            }
+            
+            function buildRegionMenuItems() {
+                // as authentication is not implemented, have to use a test user
+                loadRegions("test@test.com", function onLoad(results) {
+
+                    var resultRegions = results.regions;
+                    var numberOfRegions = resultRegions.length;
+                            
+                    
+                    for (var iCurrentRegion = 0; iCurrentRegion < numberOfRegions; ++iCurrentRegion) {
+                        var currentRegion = resultRegions[iCurrentRegion];
+                        var currentRegionListElement = document.createElement('li');
+                        
+                        currentRegionListElement.innerText = "test";//currentRegion.name;
+                        currentRegionListElement.setAttribute("id", "Test");//currentRegion.id);
+
+                        var parent;
+
+                        if(currentRegion.type === "universal")
+                            parent = document.getElementById("globalZonesList");
+                        else
+                            parent = document.getElementById("userZonesList");
+                        
+                        parent.appendChild(currentRegionListElement);
+                    }
+                });
             }
 			
 			//this will grab the coordinates from the drawing manager on mouse up.
@@ -126,7 +156,7 @@
 				});
 			}
             google.maps.event.addDomListener(window, 'load', initialize);
-        </script>
+        </script><!--
         <script type="text/javascript">
             $(function() {
                 $("#menu")
@@ -149,6 +179,6 @@
                     }
                 );
 			});
-		</script>
+		</script> -->
     </body>
 </html>
