@@ -156,7 +156,7 @@
 				});
 			}
             google.maps.event.addDomListener(window, 'load', initialize);
-        </script><!--
+        </script>
         <script type="text/javascript">
             $(function() {
                 $("#menu")
@@ -179,6 +179,6 @@
                     }
                 );
 			});
-		</script> -->
+		</script> 
     </body>
 </html>
