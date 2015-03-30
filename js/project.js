@@ -25,8 +25,10 @@ function saveRegion(regionName,regionDescription)
 		region.setDescription(regionDescription);
 		
 		//debug setting the name and description.
-		alert("Region Name: " + region.getName());
-		alert("Region Description: " + region.getDescription());
+		//alert("Region Name: " + region.getName());
+		//alert("Region Description: " + region.getDescription());
+		
+		
 		//Add the region object to the global list of region objects.
 		
 		//Send the region object information off to the server to save to the database.

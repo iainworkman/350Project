@@ -139,7 +139,7 @@
                     polygonOptions: {
                         editable: true,
                         fillColor: 'RED',
-                        strokeColor: 'DARKGREEN'
+                        strokeColor: 'PURPLE'
                     }
                 });
 
@@ -193,6 +193,9 @@
 			{
 				var regionName = document.getElementById('region-name').value;
 				var regionDescription = document.getElementById('region-description').value
+				document.getElementById('region-description').value = null
+				document.getElementById('region-name').value = null;
+				
 				$('#save-region-modal').modal('toggle');
 				saveRegion(regionName,regionDescription);
 			}

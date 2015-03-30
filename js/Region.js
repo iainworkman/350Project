@@ -61,13 +61,13 @@ function Region (polygon, owner)
 	//What the polygon looks like when it belongs to a user, note that it is editable.
 	else
 	{
-		alert("In region, type of polygon.setOptions + " + typeof polygon.setOptions);
+
 		polygon.setOptions({
 			editable: true,
-			fillColor: 'GREEN',
+			fillColor: 'BLUE',
 			draggable: true,
 			clickable: true,
-			strokeColor: 'PURPLE'
+			strokeColor: 'GREEN'
 			
 		});
 	}
