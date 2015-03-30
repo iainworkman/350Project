@@ -30,6 +30,15 @@ function Region (polygon, owner)
 	//Universal -> Everyone
 	//master -> practice account.
 	this.owner_ = owner;
+	this.type_ = null;
+	if (this.owner_ === "universal")
+	{
+		this.type_ = "universal";
+	}
+	else
+	{
+		this.type_ = "personal";
+	}
 	
 	//The ID of this region. This should be set to null until saved to the database.
 	this.regionID_ = null;
@@ -73,7 +82,10 @@ function Region (polygon, owner)
 	}
 	
 	
-
+this.getType = function()
+{
+	return this.type_;
+}
 
 this.isActive = function()
 {

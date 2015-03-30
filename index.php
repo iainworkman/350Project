@@ -159,7 +159,7 @@
 						overlayMouseUpListener(event.overlay);
 						overlayMouseDownListener(event.overlay);
 						//console.debug(overlay);
-						//alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+						alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
 						$('#save-region-modal').modal();
 						
 					}
