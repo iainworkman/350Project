@@ -49,7 +49,7 @@ function Region (polygon, owner)
 	//What the polygon looks like when it is a universal type, also note that it is not editable.
 	if (this.owner_ == "universal")
 	{
-		polygon.setOptions(polygonOptions: {
+		polygon.setOptions({
                         editable: false,
                         fillColor: 'RED',
 						draggable: false,
@@ -61,80 +61,81 @@ function Region (polygon, owner)
 	//What the polygon looks like when it belongs to a user, note that it is editable.
 	else
 	{
-		polygon.setOptions(polygonOptions: {
+
+		polygon.setOptions({
 			editable: true,
-			fillColor: 'GREEN',
+			fillColor: 'BLUE',
 			draggable: true,
 			clickable: true,
-			strokeColor: 'PURPLE'
+			strokeColor: 'GREEN'
 			
 		});
 	}
 	
 	
-}
 
-function isActive()
+
+this.isActive = function()
 {
 	return this.active_;
 }
 
-function setActive(activeState)
+this.setActive = function(activeState)
 {
 	this.active_ = activeState;
 }
 
-function getPolygon()
+this.getPolygon = function()
 {
 	return this.polygon_;
 }
 
-function getPolygonPath()
+this.getPolygonPath = function()
 {
 	return this.polygon_.getPath();
 }
 
-function getOwner()
+this.getOwner = function()
 {
 	return this.owner_;
 }
 
-function getRegionID()
+this.getRegionID = function()
 {
 	return this.regionID_;
 }
 
-function getName()
+this.getName = function()
 {
 	return this.name_;
 }
 
-function getDescription()
+this.getDescription = function()
 {
-	return this.description;
+	return this.description_;
 }
 
 /**Checks to see if the given polygon is the same as the one that this region stores.
 param : polygon -> The polygon to test for.
 **/
-function containsPolygon(polygon)
+this.containsPolygon = function(polygon)
 {
 	return (this.polygon_ == polygon);
 }
 
-function setName(newName)
+this.setName = function(newName)
 {
 	this.name_ = newName;
 }
 
-function setDescription(newDescription)
+this.setDescription = function(newDescription)
 {
 	this.description_ = newDescription;
 }
 
 /**This will only allow the setting of the region id if it is already null.
 **/
-function setRegionID(newRegionID)
+this.newRegionID = function(newRegionID)
 {
 	if (this.regionID_ == null)
 	{
@@ -145,7 +146,7 @@ function setRegionID(newRegionID)
 
 /**Adds the polygon to the map, and sets the active state of this region to true.
 **/
-function addPolygonToMap()
+this.addpolygonToMap = function()
 {
 	polygon.setVisible(true);
 	this.active_ = true;
@@ -153,13 +154,13 @@ function addPolygonToMap()
 
 /**Removes the polygon from the map, and sets the active state of this region to false.
 **/
-function removePolygonFromMap()
+this.addPolygonToMap = function()
 {
 	polygon.setVisible(false);
 	this.active_ = false;
 }
 
-function XMLHTTPString()
+this.XMLHTTPString = function()
 {
 	var xmlString = "";
 	
@@ -173,7 +174,7 @@ function XMLHTTPString()
 }
 /**Saves the polygon to the database
 **/
-function savePolygon()
+this.savePolygon = function()
 {
 	//Do the magic saving thing.
 	
@@ -186,12 +187,13 @@ function savePolygon()
 
 /**Update the region in the database.
 **/
-function updatePolygon()
+this.updatePolygon = function()
 {
 	//Do the magic update thing.
 }
 
-function deletePolygon()
+this.deletePolygon = function()
 {
 	//Do the magic deletion thing.
+}
 }

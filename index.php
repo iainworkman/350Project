@@ -119,15 +119,17 @@
 
                     var resultRegions = results.regions;
                     var numberOfRegions = resultRegions.length;
-                            
+                    
+
                     
                     for (var iCurrentRegion = 0; iCurrentRegion < numberOfRegions; ++iCurrentRegion) {
                         var currentRegion = resultRegions[iCurrentRegion];
-                        var currentRegionListElement = document.createElement('li');
+                        var currentRegionListElement = document.createElement("LI");
                         
-                        currentRegionListElement.innerText = "test";//currentRegion.name;
-                        currentRegionListElement.setAttribute("id", "Test");//currentRegion.id);
-
+						
+						
+                        currentRegionListElement.innerHTML = currentRegion.name;//currentRegion.name;
+                        currentRegionListElement.setAttribute("id", currentRegion.id);//currentRegion.id);
                         var parent;
 
                         if(currentRegion.type === "universal")
@@ -136,6 +138,8 @@
                             parent = document.getElementById("userZonesList");
                         
                         parent.appendChild(currentRegionListElement);
+						
+					
                     }
                 });
             }
