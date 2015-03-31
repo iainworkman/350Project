@@ -26,6 +26,7 @@ function httpRequest(verb, url, params, onSuccess, onFailure) {
 	
         if (xmlhttp.readyState === 4 && (xmlhttp.status >= 200 && xmlhttp.status < 300)) {
             if (onSuccess !== null) {
+				alert("Received a response from json and everything went ok");
                 onSuccess(xmlhttp.response);
             }
         } else if (xmlhttp.readyState === 4 && xmlhttp.status >= 400) {
@@ -57,4 +58,51 @@ function loadRegions(userId, onLoad) {
     function onFailure() {
         alert("Failed to load regions");
     });
+}
+
+/**Function to save the given region to the database.
+ * @param userId ~ The unique identifier of the user.
+ * @param region ~ The Region to save to the database.
+ * @param onSave ~ A function to call when the region is successfully saved. This can be null, but if it is not,
+					it should be able to accept a jsonResponse.
+*/
+function saveRegionToDB(userId, region, onSave)
+{
+	var path = region.getPolygonPath();
+	var jsonPathString = '{"path" : [';
+	for (int i = 0; i < path.length; i++)
+	{
+		jsonPathString = '{ "latitude": ' + path.getAt(i).lat() + ' "longitide" : ' path.pathAt(i).lng() + '},'
+	}
+	var params = "userID=" + region.getOwner() + 
+	"&type=" + region.getType() + 
+	"&name=" + region.getName() + 
+	"&description=" + region.getDescription() + 
+	"&regionID=" + region.getRegionID();
+	
+	alert("Got here and the params are : " + params);
+	
+	httpRequest("POST","php/saveRegion.php",params,
+	function onSuccess(response) {
+		alert("Reached onSuccess in saveRegionToDB");
+		alert(response);
+		var jsonResponse = JSON.parse(response);
+		if (jsonResponse == null)
+		{
+			alert("no response from json");
+		}
+		else if (jsonResponse.error != null)
+		{
+			alert("Failed to save the region to the database with the following jsonResponse " + jsonResponse.error);
+		}
+		else
+		{
+			onSave(jsonResponse);
+		}
+	},
+		function onFailure() {
+			alert("Failed to save the region to the database. The HTTPRequest failed.");
+		}
+		
+	);
 }

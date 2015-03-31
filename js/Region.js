@@ -140,7 +140,7 @@ this.setDescription = function(newDescription)
 
 /**This will only allow the setting of the region id if it is already null.
 **/
-this.newRegionID = function(newRegionID)
+this.setID = function(newRegionID)
 {
 	if (this.regionID_ == null)
 	{
