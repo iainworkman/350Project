@@ -33,7 +33,7 @@
                 </li>
                 <li>
                     <span>Global Zones</span>                          
-                    <ul id = "globalZonesList">
+                    <ul id="globalZonesList">
                         
                     </ul>
                 </li>
@@ -113,6 +113,7 @@
 		<script type="text/javascript" src="js/project.js"></script>
 		<script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
+        <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
         <script>
 			var activePolygon;
             var map;
@@ -169,6 +170,39 @@
 					}
 					
 				});
+                
+                buildRegionMenuItems();
+            }
+            
+            function buildRegionMenuItems() {
+                // as authentication is not implemented, have to use a test user
+                loadRegions("test@test.com", function onLoad(results) {
+
+                    var resultRegions = results.regions;
+                    var numberOfRegions = resultRegions.length;
+                    
+
+                    
+                    for (var iCurrentRegion = 0; iCurrentRegion < numberOfRegions; ++iCurrentRegion) {
+                        var currentRegion = resultRegions[iCurrentRegion];
+                        var currentRegionListElement = document.createElement("LI");
+                        
+						
+						
+                        currentRegionListElement.innerHTML = currentRegion.name;//currentRegion.name;
+                        currentRegionListElement.setAttribute("id", currentRegion.id);//currentRegion.id);
+                        var parent;
+
+                        if(currentRegion.type === "universal")
+                            parent = document.getElementById("globalZonesList");
+                        else
+                            parent = document.getElementById("userZonesList");
+                        
+                        parent.appendChild(currentRegionListElement);
+						
+					
+                    }
+                });
             }
 			
 			//this will grab the coordinates from the drawing manager on mouse up.
@@ -227,6 +261,6 @@
                     }
                 );
 			});
-		</script>
+		</script> 
     </body>
 </html>

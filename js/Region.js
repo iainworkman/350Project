@@ -74,6 +74,7 @@ function Region (polygon, owner, type)
 	}
 	
 	
+
 this.getType = function()
 {
 	return this.type_;
