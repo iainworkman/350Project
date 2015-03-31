@@ -125,11 +125,9 @@
                     for (var iCurrentRegion = 0; iCurrentRegion < numberOfRegions; ++iCurrentRegion) {
                         var currentRegion = resultRegions[iCurrentRegion];
                         var currentRegionListElement = document.createElement("LI");
-                        
 						
-						
-                        currentRegionListElement.innerHTML = currentRegion.name;//currentRegion.name;
-                        currentRegionListElement.setAttribute("id", currentRegion.id);//currentRegion.id);
+                        currentRegionListElement.innerHTML = currentRegion.name;
+                        currentRegionListElement.setAttribute("id", currentRegion.id);
                         var parent;
 
                         if(currentRegion.type === "universal")
@@ -137,10 +135,12 @@
                         else
                             parent = document.getElementById("userZonesList");
                         
-                        parent.appendChild(currentRegionListElement);
-						
+                        parent.appendChild(currentRegionListElement);						
 					
-                    }
+                    }    
+                    var api = $("#menu").data( "mmenu" );
+                    alert(JSON.parse(api));
+                    api.update();
                 });
             }
 			
@@ -162,7 +162,7 @@
             google.maps.event.addDomListener(window, 'load', initialize);
         </script>
         <script type="text/javascript">
-            $(function() {
+            $(document).ready(function() {
                 $("#menu")
                 .mmenu({
                     classes		: "mm-light",
@@ -183,6 +183,6 @@
                     }
                 );
 			});
-		</script> 
+		</script>
     </body>
 </html>

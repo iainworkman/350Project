@@ -47,7 +47,6 @@ function loadRegions(userId, onLoad) {
     "use strict";
     httpRequest("GET", "php/loadRegions.php", "userId=" + encodeURIComponent(userId), 
     function onSuccess(response) {
-        alert(response);
         var jsonResponse = JSON.parse(response);
         if(jsonResponse.error != null)
             alert(jsonResponse.error);
