@@ -19,21 +19,18 @@ function removePolygon()
 function saveRegion(regionName,regionDescription)
 {
 		
-		//Make the region object.
-		var region = new Region(activePolygon,"Admin");
+		//Make the region object. This is currently working with it being a universal region by default. Later there will need to be a way to
+		//get the user.
+		var region = new Region(activePolygon,"Admin", "universal");
 		region.setName(regionName);
 		region.setDescription(regionDescription);
-		
-		//debug setting the name and description.
-		//alert("Region Name: " + region.getName());
-		//alert("Region Description: " + region.getDescription());
 		
 		
 		//Add the region object to the global list of region objects.
 		
 		//Send the region object information off to the server to save to the database.
 		
-		//Retreive the region id for this region.
+		//Retrieve the region id for this region.
 		//region.setID();
 }
 
