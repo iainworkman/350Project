@@ -111,7 +111,6 @@
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
         <!-- Include the GoogleMaps Drawing Library -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
-		<script type="text/javascript" src="js/project.js"></script>
 		<script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
@@ -154,14 +153,14 @@
 					/*Because the typeof method returns object for the overlay type(which is actually our polygon object!), we must
 					check if it has a function defined called getpath, which is only available(as far as I know) for the polygon object.
 					*/
-					alert(typeof event.overlay.setOptions);
+					//alert(typeof event.overlay.setOptions);
 					if (typeof event.overlay.getPath == 'function')
 					{
 						activePolygon = event.overlay;
 						overlayMouseUpListener(event.overlay);
 						overlayMouseDownListener(event.overlay);
 						//console.debug(overlay);
-						alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+						//alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
 						$('#save-region-modal').modal();
 						
 					}
@@ -224,6 +223,7 @@
 				});
 			}
 			
+			//called by the save button in the modal. Simply acts as a gateway to allow saving after the button press.
 			function saveRegionGateway()
 			{
 				var regionName = document.getElementById('region-name').value;
