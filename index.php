@@ -20,14 +20,32 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+ 
     </head>
-    <body>        
-        <div class="container-fluid">
+    <body> 
+        <nav id="menu">
+            <ul>
+                <li>
+                    <span>My Zones</span>
+                    <ul id="userZonesList">
+                        
+                    </ul>
+                </li>
+				
+                <li>
+                    <span>Global Zones</span>                          
+                    <ul id="globalZonesList">
+                        
+                    </ul>
+                </li>
+            </ul>
+		</nav>	
+        <div id = "primary-container" class="container-fluid">
             <div class="search-panel">
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Search for...">
                     <span class="input-group-btn">
-                        <button class="btn btn-primary" type="button">
+                        <button class="btn btn-primary" type="button" >
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </button>
                     </span>
@@ -38,24 +56,49 @@
             </div>
             <div id="map-container">
             
-            </div>        
+            </div>
+        <!-- Modal -->
+        <div id="save-region-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="add-modal-label" aria-hidden="true">
+            <div id="modal-dialog" class="modal-dialog">
+                <div id="modal-content" class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:white;">&times;  </button>
+                        <h4 class="modal-title" id="add-modal-label">Save Region</h4>
+
+                    </div>
+                    <div id="add-contact-modal-body" class="modal-body" style="max-height: 65vh;">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label for="region-name" class="col-sm-3 control-label">Region Name</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="region-name" placeholder="Region Name Here" />
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" style="padding-left:30px; padding-right:20px;">
+                                <label for="region-description" class="control-label">Description</label>
+                                <textarea id="region-description" class="form-control" rows="3"></textarea>                                   
+                            </div>                                
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="form-group col-xs-2" >
+                        </div>
+                        <div class="form-group col-xs-10">                            
+                            <button id="close-button" type="button" class="btn btn-default" data-dismiss="modal" onClick="removePolygon()">Remove polygon</button>
+                            <button id="save-button" type="button" class="btn btn-success"  onClick="saveRegionGateway()">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <nav id="menu">
-            <ul>
-                <li>
-                    <span>My Zones</span>
-                    <ul id="userZonesList">
-                        
-                    </ul>
-                </li>
-                <li>
-                    <span>Global Zones</span>                          
-                    <ul id="globalZonesList">
-                        
-                    </ul>
-                </li>
-            </ul>
-		</nav>
+        <!-- End Modal -->			
+        </div>
+
+
+
+		
+			
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         
@@ -68,9 +111,11 @@
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
         <!-- Include the GoogleMaps Drawing Library -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+		<script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
         <script>
+			var activePolygon;
             var map;
             var drawingManager;
             
@@ -95,7 +140,7 @@
                     polygonOptions: {
                         editable: true,
                         fillColor: 'RED',
-                        strokeColor: 'DARKGREEN'
+                        strokeColor: 'PURPLE'
                     }
                 });
 
@@ -103,10 +148,26 @@
 
 				//This will grab the coordinates of a region upon creation as well as well as allow grabbing them on edit.
 				google.maps.event.addListener(drawingManager, "overlaycomplete", function(event){
-					overlayMouseUpListener(event.overlay);
-					overlayMouseDownListener(event.overlay);
-					//console.debug(overlay);
-					//alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+					
+					
+					/*Because the typeof method returns object for the overlay type(which is actually our polygon object!), we must
+					check if it has a function defined called getpath, which is only available(as far as I know) for the polygon object.
+					*/
+					//alert(typeof event.overlay.setOptions);
+					if (typeof event.overlay.getPath == 'function')
+					{
+						activePolygon = event.overlay;
+						overlayMouseUpListener(event.overlay);
+						overlayMouseDownListener(event.overlay);
+						//console.debug(overlay);
+						//alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+						$('#save-region-modal').modal();
+						
+					}
+					else
+					{
+						//alert("This was a position click");
+					}
 					
 				});
                 
@@ -147,6 +208,7 @@
 			//this will grab the coordinates from the drawing manager on mouse up.
 			function overlayMouseUpListener(overlay) {
 				google.maps.event.addListener(overlay,"mouseup", function(event) {
+					activePolygon = overlay;
 					console.debug(overlay);//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
 				});
 			}
@@ -156,10 +218,27 @@
 			//these points correspond to in order to change them later.
 			function overlayMouseDownListener(overlay) {
 				google.maps.event.addListener(overlay,"mousedown", function(event) {
+					activePolygon = overlay;
 					console.debug(overlay);//alert("This is in the overlay mouse down listener; " + overlay.getPath().getArray());
 				});
 			}
+			
+			//called by the save button in the modal. Simply acts as a gateway to allow saving after the button press.
+			function saveRegionGateway()
+			{
+				var regionName = document.getElementById('region-name').value;
+				var regionDescription = document.getElementById('region-description').value
+				document.getElementById('region-description').value = null
+				document.getElementById('region-name').value = null;
+				
+				$('#save-region-modal').modal('toggle');
+				saveRegion(regionName,regionDescription);
+			}
             google.maps.event.addDomListener(window, 'load', initialize);
+			
+			
+
+		
         </script>
         <script type="text/javascript">
             $(document).ready(function() {

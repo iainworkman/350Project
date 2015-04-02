@@ -41,7 +41,49 @@ html,body {
         z-index: 5;
     }
 }
+/*This will be the overlay for the popup menu, specifically for the saveRegion popup menu.*/
+#overlay {
+/*Fill the entire screen and do not allow user interaction with anything outside of this. */
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: 0.5;
+    filter: alpha(opacity=50);
+}
 
+#modal {
+    position:absolute;
+    background:rgba(0,0,0,0.2);
+    border-radius:14px;
+    padding:8px;
+}
+
+#content {
+    border-radius:4px;
+    background:#fff;
+    padding:20px;
+}
+
+#saveButton {
+position: absolute;
+background-color: light-green;
+width:50px;
+height: 30px;
+top: 90%;
+left: 10%;
+}
+
+#cancelButton {
+position: absolute;
+background-color: light-red;
+width: 50px;
+height: 30px;
+top: 90%;
+right: 10%;
+}
 #map-container { 
     height: 100%;
 }

@@ -20,7 +20,7 @@ param : owner -> The owner of this region.
 NOTE: polygon and owner cannot be changed after creation.
 **/
 
-function Region (polygon, owner)
+function Region (polygon, owner, type)
 {
 	//The google api polygon that contains a list of points that enclose an area
 	//Documentation: https://developers.google.com/maps/documentation/javascript/reference#Polygon
@@ -30,6 +30,7 @@ function Region (polygon, owner)
 	//Universal -> Everyone
 	//master -> practice account.
 	this.owner_ = owner;
+	this.type_ = type;
 	
 	//The ID of this region. This should be set to null until saved to the database.
 	this.regionID_ = null;
@@ -47,7 +48,7 @@ function Region (polygon, owner)
 	
 	
 	//What the polygon looks like when it is a universal type, also note that it is not editable.
-	if (this.owner_ == "universal")
+	if (this.type_ == "universal")
 	{
 		polygon.setOptions({
                         editable: false,
@@ -74,6 +75,10 @@ function Region (polygon, owner)
 	
 	
 
+this.getType = function()
+{
+	return this.type_;
+}
 
 this.isActive = function()
 {
@@ -135,7 +140,7 @@ this.setDescription = function(newDescription)
 
 /**This will only allow the setting of the region id if it is already null.
 **/
-this.newRegionID = function(newRegionID)
+this.setID = function(newRegionID)
 {
 	if (this.regionID_ == null)
 	{
