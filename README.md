@@ -1,5 +1,12 @@
 # 350Project
 
+## Access
+- The website for the project can be accessed at:
+http://cmpt350ipw969.azurewebsites.net/
+
+## Auto-deploy
+The project is set up to auto deploy to the above url whenever is push to the `deploy` branch is received. All work should be merged into `master` via pull requests. A pull request will then be created periodically to merge `master` to `deploy`. If you would like to see changes pushed up to `deploy` just ask.
+
 ## Overview
 - An extension to the GoogleMaps API which includes:
 1 Search results for Points of Interest to be displayed taking into account the current GeoLocation.
