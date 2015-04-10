@@ -4,10 +4,11 @@
 var authMod = function () {
   
   //Private. No need to expose these
-  
-  var _clientId = '495074596359-7ipoia9kiss0i7ocm4v392roev081fdq.apps.googleusercontent.com';
-  var _apiKey = 'AIzaSyB7ocq9XT-8T7XlePthHQEGU7guN_GTyBI';
+
+  var _clientId = '905281911893-c2bdfqis409ih3ig2h22pj948bvlu5nb.apps.googleusercontent.com';
+  var _apiKey = 'AIzaSyBZex51plTiVy-FwL4OJvETGncXcETMhiw';
   var _scopes = "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
+
   
   var _authorizeButton = document.getElementById('auth-button');
   
