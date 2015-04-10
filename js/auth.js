@@ -99,7 +99,7 @@ var authMod = function () {
     },
     
     isUserLoggedIn : function () {
-      return _authResponseCache == null
+      return _authResponseCache != null
     },
   
     loginUser : function (){
