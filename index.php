@@ -12,8 +12,8 @@
         <!-- project css file -->
         <link href="css/project.css" rel="stylesheet">
         
-        <!-- style sheet for side menu library -->
-        <link href="css/jquery.mmenu.all.css" rel="stylesheet">
+        <!-- side bar css -->
+        <link href="css/simple-sidebar.css" rel="stylesheet">
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -23,23 +23,33 @@
  
     </head>
     <body> 
-        <nav id="menu">
-            <ul>
+        <div id="wrapper" class="toggled">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                        Zones
+                    </a>
+                </li>
                 <li>
-                    <span>My Zones</span>
-                    <ul id="userZonesList">
-                        
+                    My Zones
+                </li>
+                <li>
+                    <ul id= "userZonesList">
                     </ul>
                 </li>
-				
                 <li>
-                    <span>Global Zones</span>                          
+                    Global Zones
+                </li>
+                <li>
                     <ul id="globalZonesList">
-                        
-                    </ul>
-                </li>
+                    </ul>                    
+                </li>    
+
             </ul>
-		</nav>	
+        </div> <!-- /#sidebar-wrapper -->
+            <div id="page-content-wrapper">
         <div id = "primary-container" class="container-fluid">
             <div class="search-panel">
                 <div class="input-group">
@@ -52,7 +62,7 @@
                 </div><!-- /input-group -->
             </div>
             <div class="side-bar-button" >
-                <a class="btn btn-primary" href="#menu" class="contacts">Zones</a>
+                <a class="btn btn-primary contacts" href="#menu-toggle" id="menu-toggle">Zones</a>
             </div>
           <div class="side-bar-button" id="auth-button">
             <a class="btn btn-primary" href="" class="contacts">Login</a>
@@ -98,19 +108,12 @@
         </div>
         <!-- End Modal -->			
         </div>
-
-
-
-		
-			
+            </div>
+        </div>
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>        
         <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="js/bootstrap.min.js"></script>
-        
-        <!-- Include the Side menu library -->
-        <script src="js/jquery.mmenu.min.all.js"></script>
+        <script src="js/bootstrap.min.js"></script>        
         <!-- Include the GoogleMaps V3 API -->
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
         <!-- Include the GoogleMaps Drawing Library -->
@@ -118,10 +121,15 @@
 		<script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
+        <!-- Authorization code -->
+        <script src="js/auth.js" type="text/javascript"></script>
+        <!-- call to launch authentication script -->
+        <script src="https://apis.google.com/js/client.js?onload=handleGoogleClientLoad"></script>
         <script>
 			var activePolygon;
             var map;
             var drawingManager;
+            var handleGoogleClientLoad = new authMod().handleClientLoad;
             
             function initialize() {
                 var mapOptions = {
@@ -180,7 +188,7 @@
             
             function buildRegionMenuItems() {
                 // as authentication is not implemented, have to use a test user
-                loadRegions("test@test.com", function onLoad(results) {
+                loadRegions("Test@Test.test", function onLoad(results) {
 
                     var resultRegions = results.regions;
                     var numberOfRegions = resultRegions.length;
@@ -203,9 +211,6 @@
                         parent.appendChild(currentRegionListElement);						
 					
                     }    
-                    var api = $("#menu").data( "mmenu" );
-                    alert(JSON.parse(api));
-                    api.update();
                 });
             }
 			
@@ -238,41 +243,13 @@
 				$('#save-region-modal').modal('toggle');
 				saveRegion(regionName,regionDescription);
 			}
+            
+            $("#menu-toggle").click(function(e) {
+                e.preventDefault();
+                $("#wrapper").toggleClass("toggled");
+            });
+            
             google.maps.event.addDomListener(window, 'load', initialize);
-			
-			
-
-		
         </script>
-
-      <script src="js/auth.js" type="text/javascript"></script>
-
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $("#menu")
-                .mmenu({
-                    classes		: "mm-light",
-                    counters	: true,
-                    searchfield	: true,
-                    header		: {
-                        add			: true,
-                        update		: true,
-                        title		: "Zones"
-                    }
-                }).on(
-                    'click',
-                    'a[href^="#/"]',
-                    function() {
-                        var id_ = $(this).attr("id");
-                        alert( "You clicked " + id_ );
-                        return false;
-                    }
-                );
-			});
-
-           var handleGoogleClientLoad = new authMod().handleClientLoad;
-
-		</script>
-        <script src="https://apis.google.com/js/client.js?onload=handleGoogleClientLoad"></script>
     </body>
 </html>
