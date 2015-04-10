@@ -76,6 +76,11 @@ top: 90%;
 left: 10%;
 }
 
+#auth-button {
+  left: 420px;
+  top: 30px;
+}
+
 #cancelButton {
 position: absolute;
 background-color: light-red;

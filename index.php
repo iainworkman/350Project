@@ -51,9 +51,13 @@
                     </span>
                 </div><!-- /input-group -->
             </div>
-            <div class="side-bar-button">
+            <div class="side-bar-button" >
                 <a class="btn btn-primary" href="#menu" class="contacts">Zones</a>
             </div>
+          <div class="side-bar-button" id="auth-button">
+            <a class="btn btn-primary" href="" class="contacts">Login</a>
+          </div>
+
             <div id="map-container">
             
             </div>
@@ -240,6 +244,9 @@
 
 		
         </script>
+
+      <script src="js/auth.js" type="text/javascript"></script>
+
         <script type="text/javascript">
             $(document).ready(function() {
                 $("#menu")
@@ -262,6 +269,10 @@
                     }
                 );
 			});
+
+           var handleGoogleClientLoad = new authMod().handleClientLoad;
+
 		</script>
+        <script src="https://apis.google.com/js/client.js?onload=handleGoogleClientLoad"></script>
     </body>
 </html>
