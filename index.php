@@ -180,7 +180,7 @@
             
             function buildRegionMenuItems() {
                 // as authentication is not implemented, have to use a test user
-                loadRegions("Test@Test.test", function onLoad(results) {
+                loadRegions("Test@Test.test", map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
 
                     var resultRegions = results.regions;
                     var numberOfRegions = resultRegions.length;

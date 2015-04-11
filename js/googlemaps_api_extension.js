@@ -44,9 +44,9 @@ function httpRequest(verb, url, params, onSuccess, onFailure) {
  * @param userId ~ The unique identifier of the user
  * @param onLoad ~ Callback to execute when the loading is successfully performed
  */
-function loadRegions(userId, onLoad) {
+function loadRegions(userId, latitude, longitude, onLoad) {
     "use strict";
-    httpRequest("GET", "php/loadRegions.php", "userId=" + encodeURIComponent(userId), 
+    httpRequest("GET", "php/loadRegions.php", "userId=" + encodeURIComponent(userId) + "&latitude=" + encodeURIComponent(latitude) + "&longitude=" + encodeURIComponent(longitude), 
     function onSuccess(response) {
         var jsonResponse = JSON.parse(response);
         if(jsonResponse.error != null)
