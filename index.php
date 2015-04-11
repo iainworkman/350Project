@@ -61,13 +61,11 @@
                     </span>
                 </div><!-- /input-group -->
             </div>
-            <div class="side-bar-button" >
-                <a class="btn btn-primary contacts" href="#menu-toggle" id="menu-toggle">Zones</a>
+            <div class="side-bar-button">
+                <a class="btn btn-primary" href="#menu-toggle" id="menu-toggle">Zones</a>
+                <a class="btn btn-primary" href="#add-zone" id="add-zone">Add Zone</a>
+                <a class="btn btn-primary" href="" id="auth-button">Login</a>
             </div>
-          <div class="side-bar-button" id="auth-button">
-            <a class="btn btn-primary" href="" class="contacts">Login</a>
-          </div>
-
             <div id="map-container">
             
             </div>
@@ -142,13 +140,7 @@
                 
                 drawingManager = new google.maps.drawing.DrawingManager({
                     drawingMode: google.maps.drawing.OverlayType.MARKER,
-                    drawingControl: true,
-                    drawingControlOptions: {
-                        position: google.maps.ControlPosition.TOP_RIGHT,
-                        drawingModes: [
-                            google.maps.drawing.OverlayType.POLYGON,
-                        ]
-                    },
+                    drawingControl: false,
                     polygonOptions: {
                         editable: true,
                         fillColor: 'RED',
@@ -244,6 +236,13 @@
 				saveRegion(regionName,regionDescription);
 			}
             
+            // Starts drawing on the map
+            $("#add-zone").click(function(e) {
+                e.preventDefault();
+                drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+            });
+        
+            // Shows/Hides the side bar
             $("#menu-toggle").click(function(e) {
                 e.preventDefault();
                 $("#wrapper").toggleClass("toggled");
