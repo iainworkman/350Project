@@ -179,6 +179,8 @@
             }
             
             function buildRegionMenuItems() {
+                
+                clearRegionMenuItems();
                 // as authentication is not implemented, have to use a test user
                 loadRegions("Test@Test.test", map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
 
@@ -206,6 +208,21 @@
                 });
             }
 			
+            // Removes all the items in the regions menu
+            function clearRegionMenuItems() {
+                globalList = document.getElementById("globalZonesList");
+                
+                while(globalList.hasChildNodes()) {
+                    globalList.removeChild(globalList.lastChild);
+                }
+                
+                userList = document.getElementById("userZonesList");
+                
+                while(userList.hasChildNodes()) {
+                    userList.removeChild(userList.lastChild);   
+                }
+            }
+            
 			//this will grab the coordinates from the drawing manager on mouse up.
 			function overlayMouseUpListener(overlay) {
 				google.maps.event.addListener(overlay,"mouseup", function(event) {
@@ -233,7 +250,8 @@
 				document.getElementById('region-name').value = null;
 				
 				$('#save-region-modal').modal('toggle');
-				saveRegion(regionName,regionDescription);
+				saveRegion(regionName,regionDescription); 
+                buildRegionMenuItems();
 			}
             
             // Starts drawing on the map
