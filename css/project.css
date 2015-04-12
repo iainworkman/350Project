@@ -41,6 +41,18 @@ html,body {
         z-index: 5;
     }
 }
+
+.list-element {
+    cursor:pointer;
+}
+
+.list-element-active {
+    cursor:pointer;
+    background-color: white;
+    margin: 3px;
+    border-radius: 5px;
+}
+
 /*This will be the overlay for the popup menu, specifically for the saveRegion popup menu.*/
 #overlay {
 /*Fill the entire screen and do not allow user interaction with anything outside of this. */
