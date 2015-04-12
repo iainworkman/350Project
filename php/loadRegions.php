@@ -40,9 +40,9 @@ try {
         SELECT reg_identifier 
         FROM t_region_coordinates 
         WHERE 
-            ABS(reg_latitude - ?) < 100.0
+            ABS(reg_latitude - ?) < 0.2
             AND
-            ABS(reg_longitude - ?) < 100.0
+            ABS(reg_longitude - ?) < 0.2
     )
     "
     );

@@ -112,10 +112,8 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>        
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="js/bootstrap.min.js"></script>        
-        <!-- Include the GoogleMaps V3 API -->
-        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
-        <!-- Include the GoogleMaps Drawing Library -->
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
+        <!-- Include the GoogleMaps API, with drawing and geometry libraries -->
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing,geometry"></script>
 		<script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
@@ -128,6 +126,9 @@
             var map;
             var drawingManager;
             var handleGoogleClientLoad = new authMod().handleClientLoad;
+            /// The LatLng of the center of the map the last time that the data was refreshed.
+            var lastLoadCenter;
+            var doLoad = true;
             
             function initialize() {
                 var mapOptions = {
@@ -137,6 +138,8 @@
                 
                 map = new google.maps.Map(document.getElementById('map-container'),
                                           mapOptions);
+                
+                lastLoadCenter = map.getCenter();
                 
                 drawingManager = new google.maps.drawing.DrawingManager({
                     drawingMode: google.maps.drawing.OverlayType.MARKER,
@@ -150,10 +153,39 @@
 
                 drawingManager.setMap(map);  
 
+                // Handler to detect when the user has dragged the map. Checks if the distance for the drag is sufficient
+                // to trigger a refresh of the data, and if it is performs said data refresh
+                google.maps.event.addListener(map, 'center_changed', function(event) {
+                    
+                    var currentCenter = map.getCenter();                    
+                    var travelledDistanceSinceLastLoad = google.maps.geometry.spherical.computeDistanceBetween(currentCenter, lastLoadCenter);
+                    
+                    console.log(travelledDistanceSinceLastLoad);
+                    
+                    if(travelledDistanceSinceLastLoad < 10000) {
+                        return;   
+                    } else {
+                        buildRegionMenuItems();   
+                    }
+                });
+                
+                
+                // Handler to detect when the user has zoomed in or out of the map. When the user zooms out, at a certain level of zoom we
+                // stop loading regions and clear the list. When the user zooms back in we restart loading.
+                google.maps.event.addListener(map, 'zoom_changed', function(event) {
+                    if(map.getZoom() < 10 && doLoad === true) {
+                        doLoad = false;
+                        clearRegionMenuItems();
+                    } else if(map.getZoom() >=10 && doLoad === false) {
+                        doLoad = true;
+                        buildRegionMenuItems();
+                    }
+                        
+                });
+                
 				//This will grab the coordinates of a region upon creation as well as well as allow grabbing them on edit.
 				google.maps.event.addListener(drawingManager, "overlaycomplete", function(event){
-					
-					
+                    
 					/*Because the typeof method returns object for the overlay type(which is actually our polygon object!), we must
 					check if it has a function defined called getpath, which is only available(as far as I know) for the polygon object.
 					*/
@@ -180,14 +212,16 @@
             
             function buildRegionMenuItems() {
                 
+                if(!doLoad)
+                    return;
+                
+                lastLoadCenter = map.getCenter();
                 clearRegionMenuItems();
                 // as authentication is not implemented, have to use a test user
                 loadRegions("Test@Test.test", map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
 
                     var resultRegions = results.regions;
                     var numberOfRegions = resultRegions.length;
-                    
-
                     
                     for (var iCurrentRegion = 0; iCurrentRegion < numberOfRegions; ++iCurrentRegion) {
                         var currentRegion = resultRegions[iCurrentRegion];
@@ -204,7 +238,9 @@
                         
                         parent.appendChild(currentRegionListElement);						
 					
-                    }    
+                    }
+                    
+                   
                 });
             }
 			
