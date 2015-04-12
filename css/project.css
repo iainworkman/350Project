@@ -42,15 +42,56 @@ html,body {
     }
 }
 
-.list-element {
+.list-element {    
+    text-indent: 20px;
+    line-height: 30px;
+    display: block;
     cursor:pointer;
+    background-color:  #cfd8dc;
+    margin: 3px;
+    border-radius: 5px;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.list-element:hover{
+    text-indent: 20px;
+    line-height: 30px;
+    display: block;
+    cursor:pointer;
+    background-color: #b0bec5;
+    margin: 3px;
+    border-radius: 5px;
+    color: black;  
+    text-decoration: none;
+    font-weight: bold;
 }
 
 .list-element-active {
+    text-indent: 20px;
+    line-height: 30px;
+    display: block;
     cursor:pointer;
-    background-color: white;
+    background-color: #337AB7;
     margin: 3px;
     border-radius: 5px;
+    color:white;  
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.list-element-active:hover {
+    text-indent: 20px;
+    line-height: 30px;
+    display: block;
+    cursor:pointer;
+    background-color: #286090;
+    margin: 3px;
+    border-radius: 5px;
+    color:white;  
+    text-decoration: none;
+    font-weight: bold;
 }
 
 /*This will be the overlay for the popup menu, specifically for the saveRegion popup menu.*/

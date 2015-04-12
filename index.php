@@ -307,8 +307,9 @@
                 // Add the menu item for this region
                 var regionListItem = document.createElement('a');
                 regionListItem.setAttribute('id', region.id);
-                regionListItem.setAttribute('class', 'list-element-active');
+                regionListItem.setAttribute('class', 'list-element');
                 regionListItem.setAttribute('style', 'padding: 2px; margin 2px;');
+                regionListItem.setAttribute('onclick', 'toggleRegion(this)');
                 regionListItem.innerHTML = region.name;
                 
                 var parent;
@@ -334,6 +335,33 @@
                 }
                 
                 return -1;
+            }
+            
+            // Toggles a region as being active/inactive based on the element passed
+            function toggleRegion(regionElement) {
+                
+                // Change style of element to indicate that it has been toggled
+                if(regionElement.getAttribute('class') === "list-element-active") {
+                    regionElement.setAttribute('class', 'list-element');
+                } else {
+                    regionElement.setAttribute('class', 'list-element-active');
+                }
+                
+                var regionId = regionElement.id;
+                var numberOfRegions = regionList.length;
+                
+                for(var iRegion = 0; iRegion < numberOfRegions; ++iRegion) {
+                    var currentRegion = regionList[iRegion];
+                    
+                    if(currentRegion.id === regionId) {
+                        currentRegion.isActive = !(currentRegion.isActive);
+                        
+                        if(currentRegion.isActive)
+                            currentRegion.polygon.setMap(map);
+                        else
+                            currentRegion.polygon.setMap(null);
+                    }
+                }
             }
             
             //this will grab the coordinates from the drawing manager on mouse up.
