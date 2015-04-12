@@ -50,9 +50,9 @@ var authMod = function () {
       
       _authResponseCache = resp
       
-      _authorizeButton.innerHTML = '<a class="btn btn-primary" target="_blank" href="https://accounts.google.com/logout" class="contacts">' + 
-                                    'Signout ' + _getUserFirstName() + '!' + 
-                                    '</a>'   
+      _authorizeButton.innerHTML = "Sign out " + _getUserFirstName();
+        
+    _authorizeButton.setAttribute('href', 'https://accounts.google.com/logout');
       
       _authorizeButton.onclick = _signOut
     }, function(reason) {
@@ -69,9 +69,7 @@ var authMod = function () {
        _makeApiCall();
     } else {
       _authorizeButton.style.visibility = '';
-      _authorizeButton.innerHTML = '<a class="btn btn-primary" href="" class="contacts">' + 
-                                    'Login' + 
-                                    '</a>'    
+      _authorizeButton.innerHTML = 'Login';    
 
       _authorizeButton.onclick = _handleAuthClick;
     }   

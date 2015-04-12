@@ -112,8 +112,6 @@
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
         <!-- Authorization code -->
         <script src="js/auth.js" type="text/javascript"></script>
-        <!-- call to launch authentication script -->
-        <script src="https://apis.google.com/js/client.js?onload=handleGoogleClientLoad"></script>
         <script>
             var activePolygon;
             var map;
@@ -409,5 +407,7 @@
 
             google.maps.event.addDomListener(window, 'load', initialize);
         </script>
+        <!-- call to launch authentication script -->
+        <script src="https://apis.google.com/js/client.js?onload=handleGoogleClientLoad"></script>
     </body>
 </html>
