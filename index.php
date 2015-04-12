@@ -160,8 +160,6 @@
                     var currentCenter = map.getCenter();                    
                     var travelledDistanceSinceLastLoad = google.maps.geometry.spherical.computeDistanceBetween(currentCenter, lastLoadCenter);
                     
-                    console.log(travelledDistanceSinceLastLoad);
-                    
                     if(travelledDistanceSinceLastLoad < 10000) {
                         return;   
                     } else {
@@ -236,8 +234,7 @@
                         else
                             parent = document.getElementById("userZonesList");
                         
-                        parent.appendChild(currentRegionListElement);						
-					
+                        parent.appendChild(currentRegionListElement);
                     }
                     
                    

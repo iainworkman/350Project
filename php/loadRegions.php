@@ -24,7 +24,7 @@ $password = "zm6uafeyio";
 
 try {
     $db = new PDO($dsn, $username, $password, array(PDO::ATTR_EMULATE_PREPARES => false, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)); 
-    $query = $db->prepare(
+    $regionQuery = $db->prepare(
     "SELECT 
     reg_identifier, reg_name, reg_description, reg_type, reg_user_email 
     FROM 
@@ -46,23 +46,52 @@ try {
     )
     "
     );
-    $query->bindParam(1, $_GET["userId"], PDO::PARAM_STR);
-    $query->bindParam(2, $_GET["latitude"]);
-    $query->bindParam(3, $_GET["longitude"]);
+    $regionQuery->bindParam(1, $_GET["userId"], PDO::PARAM_STR);
+    $regionQuery->bindParam(2, $_GET["latitude"]);
+    $regionQuery->bindParam(3, $_GET["longitude"]);
     
-    $query->execute();
-    $fetch = $query->fetchAll();
+    $regionQuery->execute();
+    $fetch = $regionQuery->fetchAll();
     
     $resultArray = array();
+    
+    $coordinateQuery = $db->prepare(
+    "SELECT 
+    reg_latitude, reg_longitude
+    FROM
+    t_region_coordinates
+    WHERE
+    reg_identifier = ?"                    
+    );
+            
 
     foreach ($fetch as $row) {
 
+        $currentRegionId = $row['reg_identifier'];
+        
+        $coordinateQuery->bindParam(1, $currentRegionId, PDO::PARAM_INT);
+        
+        $coordinateQuery->execute();
+        $coordinateFetch = $coordinateQuery->fetchAll();
+        
+        $coordinateResults = array();
+        
+        foreach($coordinateFetch as $coordinateRow) {
+            $latLng = array(
+                "latitude" => $coordinateRow['reg_latitude'],
+                "longitude" => $coordinateRow['reg_longitude']
+            ); 
+            
+            $coordinateResults[] = $latLng;
+        }
+        
         $currentRegion = array(
             "id" => $row['reg_identifier'],
             "name" => $row['reg_name'],
             "description" => $row['reg_description'],
             "type" => $row['reg_type'],
-            "owner" => $row['reg_user_email']
+            "owner" => $row['reg_user_email'],
+            "coordinates" => $coordinateResults
         );
 
         $resultArray[] = $currentRegion;
