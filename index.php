@@ -46,7 +46,7 @@
                 <div id = "primary-container" class="container-fluid">
                     <div class="search-panel">
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search for...">
+                            <input type="text" class="form-control" placeholder="Search for..." id="searchbox">
                             <span class="input-group-btn">
                                 <button class="btn btn-primary" type="button" >
                                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
@@ -106,12 +106,13 @@
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="js/bootstrap.min.js"></script>        
         <!-- Include the GoogleMaps API, with drawing and geometry libraries -->
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing,geometry"></script>
+
         <script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
         <!-- Authorization code -->
         <script src="js/auth.js" type="text/javascript"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places,drawing,geometry"></script>
         <script>
             var activePolygon;
             var map;
@@ -125,7 +126,8 @@
             function initialize() {
                 var mapOptions = {
                     zoom: 14,
-                    center: new google.maps.LatLng(52.1153705, -106.6166251)
+                    center: new google.maps.LatLng(52.1153705, -106.6166251),
+					mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
 
                 map = new google.maps.Map(document.getElementById('map-container'),
@@ -405,6 +407,7 @@
                 $("#wrapper").toggleClass("toggled");
             });
 
+			setupSearchBox();
             google.maps.event.addDomListener(window, 'load', initialize);
         </script>
         <!-- call to launch authentication script -->
