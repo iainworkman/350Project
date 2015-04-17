@@ -200,36 +200,96 @@ function setupSearchBox()
         position: place.geometry.location
       });
 
+	  markers.push(marker);
+	  //alert("number of markesr: " + markers.length);
 	  //Search for any user-created positions. Taking into account the time-sensitive-information.
 	  
-	  //Check to see if the marker is contained within each of the polygons here.
-	  
-	
-	for(region in regionList)
-	{
-		
-		alert("got here");
-		//because Iain failed to use the region object anywhere else, I must create a polygon out of the coordinates for every single region every single time this is done.
-		//alert("region polygon " + region.getPolygon());
-		alert((typeof region));
-		alert("regoin id " + region.id);
-		/**if (google.maps.geometry.poly.containsLocation(region.polygon, marker.getPosition()))
-		{
-			alert("got here");
-			marker.setMap(map);
-			markers.push(marker);
-			break;
-		}**/
-		alert("got here as well");
-	}
+
       
 
       bounds.extend(place.geometry.location);
-    }
+	  
 
-    map.fitBounds(bounds);
+    }
+	
+		  	  //Check to see if the marker is contained within each of the polygons here.
+	var positionWithinBounds = false;
+	var markersToKeep = new Array();
+	for (var i = 0; i < markers.length; i++)
+	{
+		var marker = markers[i];
+		var regionListLength = regionList.length;
+
+		//alert("position in markers array: " + i + " number of markers in markers array" + markers.length);
+		for(var j = 0; j < regionListLength; j++)
+		{
+			var region = regionList[j];
+			if (region.isActive && google.maps.geometry.poly.containsLocation(marker.getPosition(), region.polygon))
+			{
+				positionWithinBounds = true;
+				markersToKeep.push(marker);
+				break;
+			}
+		}
+	}
+
+	alert("number of places found2: " + markersToKeep.length);
+	
+	for (var i = 0; i < markersToKeep.length; i++)
+	{
+		markersToKeep[i].setMap(map);
+		alert(markersToKeep[i].title + " " + markersToKeep[i].position);
+	}
+	if (positionWithinBounds)
+	{
+		map.fitBounds(bounds);
+	}
+	else
+	{
+		alert("There is no location that matches that search term that is within one of your regions.");
+	}
+			markers = markersToKeep;
+    
   });
   // [END region_getplaces]
 
 
+}
+
+function setupSearchBox2()
+{
+	var geocoder = new google.maps.Geocoder();
+	var markers = [];
+	  // Create the search box and link it to the UI element.
+  var input = /** @type {HTMLInputElement} */(
+      document.getElementById('searchbox'));
+ 
+ var searchBox = new google.maps.places.SearchBox(
+    /** @type {HTMLInputElement} */(input));
+	
+	 // [START region_getplaces]
+  // Listen for the event fired when the user selects an item from the
+  // pick list. Retrieve the matching places for that item.
+  google.maps.event.addListener(searchBox, 'places_changed', function() {
+	var address = $('#searchbox').val();
+    geocoder.geocode( { 'address': address}, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) 
+        {
+			for (var i = 0; i < results.length; i++)
+			{
+				map.setCenter(results[i].geometry.location);
+				var marker = new google.maps.Marker({
+					map: map, 
+					position: results[i].geometry.location
+				});
+			}	
+		}		
+        else 
+        {
+            alert("Geocode was not successful for the following reason: " + status);
+        }
+			
+
+    });
+});
 }

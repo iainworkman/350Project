@@ -287,7 +287,6 @@
                 
                 // Append to regionList
                 regionList.push(region);
-                
                 // Add Polygon to region
                 var regionCoords = new Array();
                 
@@ -355,10 +354,12 @@
                 
                 for(var iRegion = 0; iRegion < numberOfRegions; ++iRegion) {
                     var currentRegion = regionList[iRegion];
-                    
-                    if(currentRegion.id === regionId) {
+					//alert("region id from list: " + currentRegion.id + " region if from element: " + regionId);
+					//alert("true or false " + (currentRegion.id == regionId));
+                    if(currentRegion.id == regionId) {
+						alert("region active state before " + currentRegion.isActive);
                         currentRegion.isActive = !(currentRegion.isActive);
-                        
+                        alert("region active state after " + currentRegion.isActive);
                         if(currentRegion.isActive)
                             currentRegion.polygon.setMap(map);
                         else
