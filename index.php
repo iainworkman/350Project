@@ -48,7 +48,7 @@
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Search for..." id="searchbox">
                             <span class="input-group-btn">
-                                <button class="btn btn-primary" type="button" >
+                                <button class="btn btn-primary" type="button" onClick="performSearch()">
                                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                                 </button>
                             </span>
@@ -402,7 +402,15 @@
             // Starts drawing on the map
             $("#add-zone").click(function (e) {
                 e.preventDefault();
-                drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+				if (drawingManager.getDrawingMode() == google.maps.drawing.OverlayType.POLYGON)
+				{
+					drawingManager.setDrawingMode(null);
+				}
+				else
+				{
+					drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+				}
+                
             });
 
             // Shows/Hides the side bar

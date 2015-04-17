@@ -156,9 +156,6 @@ function saveRegion(regionName,regionDescription)
 		});
 }
 
-function setupSearchBox()
-{
-	
 	var markers = [];
 	  // Create the search box and link it to the UI element.
   var input = /** @type {HTMLInputElement} */(
@@ -167,10 +164,12 @@ function setupSearchBox()
  var searchBox = new google.maps.places.SearchBox(
     /** @type {HTMLInputElement} */(input));
 	
+function setupSearchBox()
+{
 	 // [START region_getplaces]
   // Listen for the event fired when the user selects an item from the
   // pick list. Retrieve the matching places for that item.
-  google.maps.event.addListener(searchBox, 'places_changed', function() {
+  google.maps.event.addListener(searchBox, 'places_changed', performSearch = function() {
     var places = searchBox.getPlaces();
 
     if (places.length == 0) {
@@ -251,45 +250,4 @@ function setupSearchBox()
 			markers = markersToKeep;
     
   });
-  // [END region_getplaces]
-
-
-}
-
-function setupSearchBox2()
-{
-	var geocoder = new google.maps.Geocoder();
-	var markers = [];
-	  // Create the search box and link it to the UI element.
-  var input = /** @type {HTMLInputElement} */(
-      document.getElementById('searchbox'));
- 
- var searchBox = new google.maps.places.SearchBox(
-    /** @type {HTMLInputElement} */(input));
-	
-	 // [START region_getplaces]
-  // Listen for the event fired when the user selects an item from the
-  // pick list. Retrieve the matching places for that item.
-  google.maps.event.addListener(searchBox, 'places_changed', function() {
-	var address = $('#searchbox').val();
-    geocoder.geocode( { 'address': address}, function(results, status) {
-        if (status == google.maps.GeocoderStatus.OK) 
-        {
-			for (var i = 0; i < results.length; i++)
-			{
-				map.setCenter(results[i].geometry.location);
-				var marker = new google.maps.Marker({
-					map: map, 
-					position: results[i].geometry.location
-				});
-			}	
-		}		
-        else 
-        {
-            alert("Geocode was not successful for the following reason: " + status);
-        }
-			
-
-    });
-});
 }
