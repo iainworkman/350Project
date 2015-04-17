@@ -232,12 +232,12 @@ function setupSearchBox()
 		}
 	}
 
-	alert("number of places found2: " + markersToKeep.length);
+	//alert("number of places found2: " + markersToKeep.length);
 	
 	for (var i = 0; i < markersToKeep.length; i++)
 	{
 		markersToKeep[i].setMap(map);
-		alert(markersToKeep[i].title + " " + markersToKeep[i].position);
+		//alert(markersToKeep[i].title + " " + markersToKeep[i].position);
 	}
 	if (positionWithinBounds)
 	{
