@@ -101,6 +101,7 @@
                 </div>
             </div>
         </div>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places,drawing,geometry"></script>
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>        
         <!-- Include all compiled plugins (below), or include individual files as needed -->
@@ -112,7 +113,7 @@
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
         <!-- Authorization code -->
         <script src="js/auth.js" type="text/javascript"></script>
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places,drawing,geometry"></script>
+		
         <script>
             var activePolygon;
             var map;
@@ -211,10 +212,12 @@
                 lastLoadCenter = map.getCenter();
                 
                 loadRegions("TEST@TEST.TEST", map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
+					
                     var resultRegions = results.regions;
                     var numberOfDbRegions = resultRegions.length;
                     var numberOfCurrentRegions = regionList.length;
                     
+					
                     // Remove all current regions not in results regions (they've gone too far away)
                     var regionsToRemove = new Array();
                     var found = false;

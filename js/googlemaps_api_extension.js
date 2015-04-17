@@ -158,6 +158,7 @@ function saveRegion(regionName,regionDescription)
 
 function setupSearchBox()
 {
+	
 	var markers = [];
 	  // Create the search box and link it to the UI element.
   var input = /** @type {HTMLInputElement} */(
@@ -193,16 +194,35 @@ function setupSearchBox()
 
       // Create a marker for each place.
       var marker = new google.maps.Marker({
-        map: map,
+		//  map: map,
         icon: image,
         title: place.name,
         position: place.geometry.location
       });
 
-	  
+	  //Search for any user-created positions. Taking into account the time-sensitive-information.
 	  
 	  //Check to see if the marker is contained within each of the polygons here.
-      markers.push(marker);
+	  
+	
+	for(region in regionList)
+	{
+		
+		alert("got here");
+		//because Iain failed to use the region object anywhere else, I must create a polygon out of the coordinates for every single region every single time this is done.
+		//alert("region polygon " + region.getPolygon());
+		alert((typeof region));
+		alert("regoin id " + region.id);
+		/**if (google.maps.geometry.poly.containsLocation(region.polygon, marker.getPosition()))
+		{
+			alert("got here");
+			marker.setMap(map);
+			markers.push(marker);
+			break;
+		}**/
+		alert("got here as well");
+	}
+      
 
       bounds.extend(place.geometry.location);
     }
