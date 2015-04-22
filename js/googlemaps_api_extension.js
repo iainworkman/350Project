@@ -214,8 +214,11 @@ ZERO_RESULTS: No result was found for this request.**/
 			 }
 			 else
 			 {
+
 				 setMarkers(markers);
-				 //centerMap(markers);
+				 centerMap(markers);
+				 
+
 			 }
 		  }
 		 
@@ -263,13 +266,17 @@ function isRegionSelected()
 /**Centers the map so that it is at a zoom in which all of ther markesr can be seen.**/
 function centerMap(centerMarkers)
 {
-	 var bounds = new google.maps.LatLngBounds();
-	 for (var i = 0; i < centerMarkers.length; i++)
-	 {
-		 bounds.extend(centerMarkers[i].position);
-	 }
+	if (centerMarkers.length >0)
+	{
+			 var bounds = new google.maps.LatLngBounds();
+		for (var i = 0; i < centerMarkers.length; i++)
+		{
+			bounds.extend(centerMarkers[i].position);
+		}
 	 
-	 map.fitBounds(bounds);	 
+		map.fitBounds(bounds);	 
+	}
+
 }
 
 /**filters the given markers to be a list of only markers that are actually located in a selected region.**/
@@ -297,12 +304,17 @@ function filterSearchResults(markers)
 		}
 	}
 
+	if (markersToKeep.length <= 0)
+	{
+		alert("No results were found in the selected regions for the given search term.");
+	}
+	else{
+			setMarkers(markersToKeep);
+		centerMap(markersToKeep);
+		markers = markersToKeep;
+	}
+
 	
-	setMarkers(markersToKeep);
-	
-	markers = markersToKeep;
-	
-	//centerMap(markers);
 }
 
 /**
