@@ -46,9 +46,9 @@
                 <div id = "primary-container" class="container-fluid">
                     <div class="search-panel">
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search for...">
+                            <input type="text" class="form-control" placeholder="Search for..." id="searchbox">
                             <span class="input-group-btn">
-                                <button class="btn btn-primary" type="button" >
+                                <button class="btn btn-primary" type="button" onClick="fireSearch()">
                                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                                 </button>
                             </span>
@@ -101,17 +101,19 @@
                 </div>
             </div>
         </div>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places,drawing,geometry"></script>
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>        
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="js/bootstrap.min.js"></script>        
         <!-- Include the GoogleMaps API, with drawing and geometry libraries -->
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing,geometry"></script>
+
         <script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
         <!-- Authorization code -->
         <script src="js/auth.js" type="text/javascript"></script>
+		
         <script>
             var activePolygon;
             var map;
@@ -121,11 +123,25 @@
             var lastLoadCenter;
             var doLoad = true;
             var regionList = new Array();
-
+			
+			//The places that are found in a result search.
+			var places = [];
+			//Holder for places of interest that are looked up in a search.
+			var markers = [];
+	  // Create the search box and link it to the UI element. 
+			var input = /** @type {HTMLInputElement} */(
+				document.getElementById('searchbox'));
+ 
+			var searchBox = new google.maps.places.SearchBox(
+				/** @type {HTMLInputElement} */(input));
+				
+			
+				
             function initialize() {
                 var mapOptions = {
                     zoom: 14,
-                    center: new google.maps.LatLng(52.1153705, -106.6166251)
+                    center: new google.maps.LatLng(52.1153705, -106.6166251),
+					mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
 
                 map = new google.maps.Map(document.getElementById('map-container'),
@@ -209,10 +225,12 @@
                 lastLoadCenter = map.getCenter();
                 
                 loadRegions("TEST@TEST.TEST", map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
+					
                     var resultRegions = results.regions;
                     var numberOfDbRegions = resultRegions.length;
                     var numberOfCurrentRegions = regionList.length;
                     
+					
                     // Remove all current regions not in results regions (they've gone too far away)
                     var regionsToRemove = new Array();
                     var found = false;
@@ -282,7 +300,6 @@
                 
                 // Append to regionList
                 regionList.push(region);
-                
                 // Add Polygon to region
                 var regionCoords = new Array();
                 
@@ -350,10 +367,11 @@
                 
                 for(var iRegion = 0; iRegion < numberOfRegions; ++iRegion) {
                     var currentRegion = regionList[iRegion];
-                    
-                    if(currentRegion.id === regionId) {
+				
+                    if(currentRegion.id == regionId) {
+					
                         currentRegion.isActive = !(currentRegion.isActive);
-                        
+                     
                         if(currentRegion.isActive)
                             currentRegion.polygon.setMap(map);
                         else
@@ -396,7 +414,15 @@
             // Starts drawing on the map
             $("#add-zone").click(function (e) {
                 e.preventDefault();
-                drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+				if (drawingManager.getDrawingMode() == google.maps.drawing.OverlayType.POLYGON)
+				{
+					drawingManager.setDrawingMode(null);
+				}
+				else
+				{
+					drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+				}
+                
             });
 
             // Shows/Hides the side bar
@@ -405,6 +431,7 @@
                 $("#wrapper").toggleClass("toggled");
             });
 
+			setupSearchBox();
             google.maps.event.addDomListener(window, 'load', initialize);
         </script>
         <!-- call to launch authentication script -->
