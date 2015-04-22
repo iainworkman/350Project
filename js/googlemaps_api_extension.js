@@ -153,93 +153,123 @@ function saveRegion(regionName,regionDescription)
 		});
 }
 
-
+//To get information on place searches.
+//https://developers.google.com/maps/documentation/javascript/places#place_details
 function fireSearch()
 {
 	
 	
-	$('#searchbox').focus();
-var e = jQuery.Event("keypress");
-e.which = 13; //choose the one you want
-e.keyCode = 13;
-	 $('#searchbox').trigger(e);
+alert("searchoboc contents: " + document.getElementById('searchbox').value);
 	
-	searchBox
+	var text = document.getElementById('searchbox').value;
+	var request = {
+		query: text	
+	};
+	
+
+	
+	
+	  var service = new google.maps.places.PlacesService(map);
+		service.textSearch(request, callback);
+	
 }
+	function callback(results, status)
+	{
+			var places = [];
+	var markers = [];
+		alert("got here");
+		/**
+		ERROR: There was a problem contacting the Google servers.
+INVALID_REQUEST: This request was invalid.
+OK: The response contains a valid result.
+OVER_QUERY_LIMIT: The webpage has gone over its request quota.
+REQUEST_DENIED: The webpage is not allowed to use the PlacesService.
+UNKNOWN_ERROR: The PlacesService request could not be processed due to a server error. The request may succeed if you try again.
+ZERO_RESULTS: No result was found for this request.**/
+		  if (status == google.maps.places.PlacesServiceStatus.OK) 
+		  {
+			for (var i = 0; i < results.length; i++) 
+			{
+				places[i] = results[i];
+				var image = {
+					url: places[i].icon,
+					size: new google.maps.Size(71, 71),
+					origin: new google.maps.Point(0, 0),
+					anchor: new google.maps.Point(17, 34),
+					scaledSize: new google.maps.Size(25, 25)
+				};
+				var marker = new google.maps.Marker({
+					icon: image,
+					title: places[i].name + "\nAddress: " + places[i].formatted_address,
+					position: places[i].geometry.location
+				});
+				markers[i] = marker;
+			}
+			 if (isRegionSelected())
+			 {
+				 filterSearchResults(markers);
+			 }
+			 else
+			 {
+				 setMarkers(markers);
+				 centerMap(markers);
+			 }
+		  }
+		 
+		  else if (status == google.maps.places.PlacesServiceStatus.ERROR)
+		  {
+			  alert("There was a problem connecting to google services.");
+		  }
+		  else if (status == google.maps.places.PlacesServiceStatus.INVALID_REQUEST)
+		  {
+			  alert("For some reason the request was not valid.");
+		  }
+		  else if (status == google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT)
+		  {
+			  alert("The search results are too big, please be more specific about the search.");
+		  }
+		  else if (status == google.maps.places.PlacesServiceStatus.REQUEST_DENIES)
+		  {
+			  alert("This site was banned from using google placesService :(");
+		  }
+		  else if (status == google.maps.places.PlacesServiceStatus.UNKOWN_ERROR)
+		  {
+			  alert("something went wrong, please try again.");
+		  }
+		  else if (status == google.maps.places.PlacesServiceStatus.ZERO_RESULTS)
+		  {
+			  alert("The search query returned 0 results for that search term.");
+		  }
+	};
 	
-function setupSearchBox()
+function isRegionSelected()
 {
-
-	 // [START region_getplaces]
-  // Listen for the event fired when the user selects an item from the
-  // pick list. Retrieve the matching places for that item.
-  google.maps.event.addListener(searchBox, 'places_changed', performSearch = function() {
-    var places = searchBox.getPlaces();
-
-	//Places refers to the list of places that was returned from the google search operation.
-    if (places.length == 0) {
-      return;
-    }
-    for (var i = 0, marker; marker = markers[i]; i++) {
-      marker.setMap(null);
-    }
-
-    // For each place, get the icon, place name, and location.
-    markers = [];
-    var bounds = new google.maps.LatLngBounds();
-    for (var i = 0, place; place = places[i]; i++) {
-      var image = {
-        url: place.icon,
-        size: new google.maps.Size(71, 71),
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(17, 34),
-        scaledSize: new google.maps.Size(25, 25)
-      };
-
-      // Create a marker for each place.
-      var marker = new google.maps.Marker({
-		//  map: map,
-        icon: image,
-        title: place.name,
-        position: place.geometry.location
-      });
-
-	  markers.push(marker);
-	  
-	  //Search for any user-created positions. Taking into account the time-sensitive-information.
-	  
-
-      
-
-      bounds.extend(place.geometry.location);
-	  
-
-    }
-	
 	//Determine if a region is selected. IF none are selected, the search will return all results.
 	var regionSelected = false;
 	for (var i = 0; i < regionList.length; i++)
 	{
 		if (regionList[i].isActive)
 		{
-			regionSelected = true;
-			break;
+			return true;
 		}
 	}
-	
-	
-	//If there is no region selected, simply set all of the markers to be on this map.
-	if (!regionSelected)
-	{
-		for (var i = 0; i < markers.length; i++)
-		{
-			markers[i].setMap(map);
-			map.fitBounds(bounds);
-		}
-		return;
-	}
-	
-	//If a region is selected, go through the list of markers and remove any that are not in the selected regions.
+	return false;
+}
+
+function centerMap(centerMarkers)
+{
+	 var bounds = new google.maps.LatLngBounds();
+	 for (var i = 0; i < centerMarkers.length; i++)
+	 {
+		 bounds.extend(centerMarkers[i].position);
+	 }
+	 
+	 map.fitBounds(bounds);	 
+}
+
+function filterSearchResults(markers)
+{
+		//If a region is selected, go through the list of markers and remove any that are not in the selected regions.
 		  	  //Check to see if the marker is contained within each of the polygons here.
 	var positionWithinBounds = false;
 	var markersToKeep = new Array();
@@ -262,20 +292,34 @@ function setupSearchBox()
 	}
 
 	
-	for (var i = 0; i < markersToKeep.length; i++)
+	setMarkers(markersToKeep);
+	
+	markers = markersToKeep;
+	
+	centerMap(markers);
+}
+
+function setMarkers(markersToSet)
+{
+	for (var i = 0; i < markersToSet.length; i++)
 	{
-		markersToKeep[i].setMap(map);
-		
+		markersToSet[i].setMap(map);
 	}
-	if (positionWithinBounds)
-	{
-		map.fitBounds(bounds);
-	}
-	else
-	{
-		alert("There is no location that matches that search term that is within a selected regions. Please select additional regions, or deselect all of them to search the entire map.");
-	}
-			markers = markersToKeep;
-    
+}
+function setupSearchBox()
+{
+
+	 // [START region_getplaces]
+  // Listen for the event fired when the user selects an item from the
+  // pick list. Retrieve the matching places for that item.
+  //This will activate when the enter button is pressed.
+  google.maps.event.addListener(searchBox, 'places_changed', performSearch = function() {
+	fireSearch();
   });
+}
+
+
+function searchPlaces()
+{
+	
 }

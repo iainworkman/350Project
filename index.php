@@ -48,7 +48,7 @@
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Search for..." id="searchbox">
                             <span class="input-group-btn">
-                                <button class="btn btn-primary" type="button" onClick="performSearch()">
+                                <button class="btn btn-primary" type="button" onClick="fireSearch()">
                                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                                 </button>
                             </span>
@@ -124,6 +124,8 @@
             var doLoad = true;
             var regionList = new Array();
 			
+			//The places that are found in a result search.
+			var places = [];
 			//Holder for places of interest that are looked up in a search.
 			var markers = [];
 	  // Create the search box and link it to the UI element. 
@@ -133,6 +135,7 @@
 			var searchBox = new google.maps.places.SearchBox(
 				/** @type {HTMLInputElement} */(input));
 				
+			
 				
             function initialize() {
                 var mapOptions = {
