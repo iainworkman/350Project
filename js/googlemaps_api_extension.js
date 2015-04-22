@@ -138,8 +138,9 @@ function saveRegion(regionName,regionDescription)
 		
 		//Make the region object. This is currently working with it being a universal region by default. Later there will need to be a way to
 		//get the user.
+        var currentUser = authMod.getUserEmail();
 		//the active region is currently set in all of the listeners.
-		var region = new Region(activePolygon,"Admin", "universal");
+		var region = new Region(activePolygon, currentUser, "personal");
 		region.setName(regionName);
 		region.setDescription(regionDescription);
 		
@@ -147,7 +148,8 @@ function saveRegion(regionName,regionDescription)
 		//Add the region object to the global list of region objects.
 		
 		//Send the region object information off to the server to save to the database.
-		saveRegionToDB("admin",region, function onSave(results){
+		saveRegionToDB(currentUser,region, function onSave(results){
+
 			//This sets the region id of the newly saved region. The response from saveRegion.php is the new region id.
 			region.setID(results);
 		});
@@ -351,3 +353,4 @@ function setupSearchBox()
 	fireSearch();
   });
 }
+

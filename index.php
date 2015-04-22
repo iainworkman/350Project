@@ -56,7 +56,7 @@
                     </div>
                     <div class="side-bar-button">
                         <a class="btn btn-primary" href="#menu-toggle" id="menu-toggle">Zones</a>
-                        <a class="btn btn-primary" href="#add-zone" id="add-zone">Add Zone</a>
+                        <a class="btn btn-primary" href="#add-zone" id="add-zone" style="display:none">Add Zone</a>
                         <a class="btn btn-primary" href="" id="auth-button">Login</a>
                     </div>
                     <div id="map-container">
@@ -118,7 +118,8 @@
             var activePolygon;
             var map;
             var drawingManager;
-            var handleGoogleClientLoad = new authMod().handleClientLoad;
+            var authMod = new authMod();
+            var handleGoogleClientLoad = authMod.handleClientLoad;            
             /// The LatLng of the center of the map the last time that the data was refreshed.
             var lastLoadCenter;
             var doLoad = true;
@@ -213,7 +214,7 @@
 
                 });
 
-                updateRegions();
+                
             }
             
             
@@ -222,10 +223,11 @@
                 if(!doLoad)
                     return;
                 
-                lastLoadCenter = map.getCenter();
+                lastLoadCenter = map.getCenter();              
                 
-                loadRegions("TEST@TEST.TEST", map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
-					
+
+                loadRegions(authMod.getUserEmail(), map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
+
                     var resultRegions = results.regions;
                     var numberOfDbRegions = resultRegions.length;
                     var numberOfCurrentRegions = regionList.length;

@@ -49,8 +49,10 @@ var authMod = function () {
     request.then(function(resp) {
       
       _authResponseCache = resp
-      
-      _authorizeButton.innerHTML = "Sign out " + _getUserFirstName();
+      updateRegions();
+        var addZoneElement = document.getElementById("add-zone");
+        addZoneElement.setAttribute("style", "");
+      _authorizeButton.innerHTML = "Sign Out ";
         
     _authorizeButton.setAttribute('href', 'https://accounts.google.com/logout');
       
@@ -69,8 +71,9 @@ var authMod = function () {
        _makeApiCall();
     } else {
       _authorizeButton.style.visibility = '';
-      _authorizeButton.innerHTML = 'Login';    
-
+      _authorizeButton.innerHTML = 'Sign In';    
+        var addZoneElement = document.getElementById("add-zone");
+        addZoneElement.setAttribute("style", "display:none");
       _authorizeButton.onclick = _handleAuthClick;
     }   
     
