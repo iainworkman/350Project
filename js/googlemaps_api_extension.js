@@ -26,7 +26,7 @@ function httpRequest(verb, url, params, onSuccess, onFailure) {
 	
         if (xmlhttp.readyState === 4 && (xmlhttp.status >= 200 && xmlhttp.status < 300)) {
             if (onSuccess !== null) {
-				//alert("JSON request completed.");
+				
                 onSuccess(xmlhttp.response);
             }
         } else if (xmlhttp.readyState === 4 && xmlhttp.status >= 400) {
@@ -72,7 +72,7 @@ function saveRegionToDB(userId, region, onSave)
 	
 	//Stringify results in a json object. consisting of an array of coordinates ["k"] referring to latitude and ["D"] referring to longitude.
 	var polygonPath = JSON.stringify(path);
-	//alert("This is the json object that was created " + polygonPath);
+
 	var params = "userID=" + region.getOwner() + 
 	"&type=" + region.getType() + 
 	"&name=" + region.getName() + 
@@ -80,12 +80,11 @@ function saveRegionToDB(userId, region, onSave)
 	"&regionID=" + region.getRegionID() + 
 	"&polygonPath=" + polygonPath;
 	
-	//alert("Got here and the params are : " + params);
+	
 	
 	httpRequest("POST","php/saveRegion.php",params,
 	function onSuccess(response) {
-		//alert("Reached onSuccess in saveRegionToDB");
-		//alert(response);
+
 		var jsonResponse = JSON.parse(response);
 		if (jsonResponse == null)
 		{
@@ -149,29 +148,35 @@ function saveRegion(regionName,regionDescription)
 		
 		//Send the region object information off to the server to save to the database.
 		saveRegionToDB("admin",region, function onSave(results){
-			//alert("Succeeded in saving to the database.");
-			//alert("Region id " + results);
 			//This sets the region id of the newly saved region. The response from saveRegion.php is the new region id.
 			region.setID(results);
 		});
 }
 
-	var markers = [];
-	  // Create the search box and link it to the UI element.
-  var input = /** @type {HTMLInputElement} */(
-      document.getElementById('searchbox'));
- 
- var searchBox = new google.maps.places.SearchBox(
-    /** @type {HTMLInputElement} */(input));
+
+function fireSearch()
+{
+	
+	
+	$('#searchbox').focus();
+var e = jQuery.Event("keypress");
+e.which = 13; //choose the one you want
+e.keyCode = 13;
+	 $('#searchbox').trigger(e);
+	
+	searchBox
+}
 	
 function setupSearchBox()
 {
+
 	 // [START region_getplaces]
   // Listen for the event fired when the user selects an item from the
   // pick list. Retrieve the matching places for that item.
   google.maps.event.addListener(searchBox, 'places_changed', performSearch = function() {
     var places = searchBox.getPlaces();
 
+	//Places refers to the list of places that was returned from the google search operation.
     if (places.length == 0) {
       return;
     }
@@ -200,7 +205,7 @@ function setupSearchBox()
       });
 
 	  markers.push(marker);
-	  //alert("number of markesr: " + markers.length);
+	  
 	  //Search for any user-created positions. Taking into account the time-sensitive-information.
 	  
 
@@ -211,6 +216,30 @@ function setupSearchBox()
 
     }
 	
+	//Determine if a region is selected. IF none are selected, the search will return all results.
+	var regionSelected = false;
+	for (var i = 0; i < regionList.length; i++)
+	{
+		if (regionList[i].isActive)
+		{
+			regionSelected = true;
+			break;
+		}
+	}
+	
+	
+	//If there is no region selected, simply set all of the markers to be on this map.
+	if (!regionSelected)
+	{
+		for (var i = 0; i < markers.length; i++)
+		{
+			markers[i].setMap(map);
+			map.fitBounds(bounds);
+		}
+		return;
+	}
+	
+	//If a region is selected, go through the list of markers and remove any that are not in the selected regions.
 		  	  //Check to see if the marker is contained within each of the polygons here.
 	var positionWithinBounds = false;
 	var markersToKeep = new Array();
@@ -219,7 +248,7 @@ function setupSearchBox()
 		var marker = markers[i];
 		var regionListLength = regionList.length;
 
-		//alert("position in markers array: " + i + " number of markers in markers array" + markers.length);
+
 		for(var j = 0; j < regionListLength; j++)
 		{
 			var region = regionList[j];
@@ -232,12 +261,11 @@ function setupSearchBox()
 		}
 	}
 
-	//alert("number of places found2: " + markersToKeep.length);
 	
 	for (var i = 0; i < markersToKeep.length; i++)
 	{
 		markersToKeep[i].setMap(map);
-		//alert(markersToKeep[i].title + " " + markersToKeep[i].position);
+		
 	}
 	if (positionWithinBounds)
 	{
@@ -245,7 +273,7 @@ function setupSearchBox()
 	}
 	else
 	{
-		alert("There is no location that matches that search term that is within one of your regions.");
+		alert("There is no location that matches that search term that is within a selected regions. Please select additional regions, or deselect all of them to search the entire map.");
 	}
 			markers = markersToKeep;
     

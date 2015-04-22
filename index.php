@@ -101,7 +101,7 @@
                 </div>
             </div>
         </div>
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places,drawing,geometry"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places,drawing,geometry"></script>
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>        
         <!-- Include all compiled plugins (below), or include individual files as needed -->
@@ -123,7 +123,17 @@
             var lastLoadCenter;
             var doLoad = true;
             var regionList = new Array();
-
+			
+			//Holder for places of interest that are looked up in a search.
+			var markers = [];
+	  // Create the search box and link it to the UI element. 
+			var input = /** @type {HTMLInputElement} */(
+				document.getElementById('searchbox'));
+ 
+			var searchBox = new google.maps.places.SearchBox(
+				/** @type {HTMLInputElement} */(input));
+				
+				
             function initialize() {
                 var mapOptions = {
                     zoom: 14,
@@ -354,12 +364,11 @@
                 
                 for(var iRegion = 0; iRegion < numberOfRegions; ++iRegion) {
                     var currentRegion = regionList[iRegion];
-					//alert("region id from list: " + currentRegion.id + " region if from element: " + regionId);
-					//alert("true or false " + (currentRegion.id == regionId));
+				
                     if(currentRegion.id == regionId) {
-						alert("region active state before " + currentRegion.isActive);
+					
                         currentRegion.isActive = !(currentRegion.isActive);
-                        alert("region active state after " + currentRegion.isActive);
+                     
                         if(currentRegion.isActive)
                             currentRegion.polygon.setMap(map);
                         else
