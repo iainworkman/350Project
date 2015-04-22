@@ -34,11 +34,11 @@
                     </li>
                     <li>
                         My Zones
-                        <div id="userZonesList"></div>
+                        <ol id="userZonesList"></ol>
                     </li>
                     <li>
                         Global Zones
-                        <div id="globalZonesList"></div>
+                        <ol id="globalZonesList"></ol>
                     </li>
                 </ul>
             </div> <!-- /#sidebar-wrapper -->
@@ -322,19 +322,32 @@
                 region.isActive = false;
                 
                 // Add the menu item for this region
-                var regionListItem = document.createElement('a');
+				
+				var regionListItem = document.createElement('Li');
+                var regionListItemToggle = document.createElement('a');
                 regionListItem.setAttribute('id', region.id);
-                regionListItem.setAttribute('class', 'list-element');
-                regionListItem.setAttribute('style', 'padding: 2px; margin 2px;');
-                regionListItem.setAttribute('onclick', 'toggleRegion(this)');
-                regionListItem.innerHTML = region.name;
+                regionListItemToggle.setAttribute('class', 'list-element');
+                regionListItemToggle.setAttribute('style', 'padding: 2px; margin: 2px; float: left;');
+                regionListItemToggle.setAttribute('onclick', 'toggleRegion(this)');
+                regionListItemToggle.innerHTML = region.name;
                 
                 var parent;
                 
                 if(region.type === "universal") {
-                    parent = document.getElementById('globalZonesList');
+					parent = document.getElementById('globalZonesList');
+					regionListItem.appendChild(regionListItemToggle);	
                 } else {
-                    parent = document.getElementById('userZonesList');   
+                    parent = document.getElementById('userZonesList');
+					var deleteButton = document.createElement('input');
+					deleteButton.setAttribute('class','deleteButton');
+					deleteButton.value='Delete';
+					deleteButton.setAttribute('type', 'button');
+					deleteButton.setAttribute('onclick','deleteRegion(this)');
+					regionListItem.appendChild(regionListItemToggle);
+					regionListItem.appendChild(deleteButton);
+
+					
+									
                 }
                 
                 parent.appendChild(regionListItem);
@@ -382,6 +395,46 @@
                 }
             }
             
+			
+			/**Delete the region using the given delete button element.
+			**/
+			function deleteRegion(listElement)
+			{
+				alert('delete button pressed');
+				var listElement = listElement.parentNode;
+				alert("list element id: " + listElement.id);
+				var regionID = listElement.id;
+				
+				
+				httpRequest("POST", "php/deleteRegion.php", ("regionID=" + regionID), 
+				function onSuccess(response) {
+					if (response != null)
+					{
+						alert(response);
+					}
+				}, 
+				function onFailure(response)
+				{
+					if (response!=null)
+					{
+						alert("The request failed for the following reasion:\n" + response);
+					}
+					else
+					{
+						alert("The request failed.");
+					}
+				});
+				
+				for (var i = 0; i < regionList.length; i++)
+				{
+					if (regionList[i].id == regionID)
+					{
+						removeCurrentRegion(regionList[i]);
+					}
+				}
+				listElement.parentNode.removeChild(listElement);
+
+			}
             //this will grab the coordinates from the drawing manager on mouse up.
             function overlayMouseUpListener(overlay) {
                 google.maps.event.addListener(overlay, "mouseup", function (event) {
