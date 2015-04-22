@@ -163,6 +163,8 @@ function fireSearch()
 	
 	var text = document.getElementById('searchbox').value;
 	var request = {
+        location: map.getCenter(),
+        radius: '500',
 		query: text	
 	};
 	
@@ -176,7 +178,7 @@ function fireSearch()
 	function callback(results, status)
 	{
 			 places = [];
-	 markers = [];
+	 clearMarkers();
 		
 		/**
 		ERROR: There was a problem contacting the Google servers.
@@ -213,7 +215,7 @@ ZERO_RESULTS: No result was found for this request.**/
 			 else
 			 {
 				 setMarkers(markers);
-				 centerMap(markers);
+				 //centerMap(markers);
 			 }
 		  }
 		 
@@ -300,7 +302,20 @@ function filterSearchResults(markers)
 	
 	markers = markersToKeep;
 	
-	centerMap(markers);
+	//centerMap(markers);
+}
+
+/**
+ * Removes all markers from the map and clears the list of markers.
+ */ 
+function clearMarkers() {
+    for (var iMarker = 0, markerCount = markers.length;
+         iMarker < markerCount;
+         ++iMarker) {
+        var currentMarker = markers[iMarker];
+        currentMarker.setMap(null);        
+    }
+    markers = [];
 }
 
 /**Set all of the markers onto the map.**/
