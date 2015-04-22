@@ -153,13 +153,13 @@ function saveRegion(regionName,regionDescription)
 		});
 }
 
-//To get information on place searches.
-//https://developers.google.com/maps/documentation/javascript/places#place_details
+/**Initiates the search.
+This is the documentation for a places search. 
+//https://developers.google.com/maps/documentation/javascript/places#place_details**/
 function fireSearch()
 {
 	
 	
-alert("searchoboc contents: " + document.getElementById('searchbox').value);
 	
 	var text = document.getElementById('searchbox').value;
 	var request = {
@@ -172,12 +172,12 @@ alert("searchoboc contents: " + document.getElementById('searchbox').value);
 	  var service = new google.maps.places.PlacesService(map);
 		service.textSearch(request, callback);
 	
-}
+}/**Handles asking the places api for a search**/
 	function callback(results, status)
 	{
-			var places = [];
-	var markers = [];
-		alert("got here");
+			 places = [];
+	 markers = [];
+		
 		/**
 		ERROR: There was a problem contacting the Google servers.
 INVALID_REQUEST: This request was invalid.
@@ -202,6 +202,7 @@ ZERO_RESULTS: No result was found for this request.**/
 					icon: image,
 					title: places[i].name + "\nAddress: " + places[i].formatted_address,
 					position: places[i].geometry.location
+					
 				});
 				markers[i] = marker;
 			}
@@ -242,6 +243,7 @@ ZERO_RESULTS: No result was found for this request.**/
 		  }
 	};
 	
+	/**@return: true if a region is selected, false if not.**/
 function isRegionSelected()
 {
 	//Determine if a region is selected. IF none are selected, the search will return all results.
@@ -256,6 +258,7 @@ function isRegionSelected()
 	return false;
 }
 
+/**Centers the map so that it is at a zoom in which all of ther markesr can be seen.**/
 function centerMap(centerMarkers)
 {
 	 var bounds = new google.maps.LatLngBounds();
@@ -267,6 +270,7 @@ function centerMap(centerMarkers)
 	 map.fitBounds(bounds);	 
 }
 
+/**filters the given markers to be a list of only markers that are actually located in a selected region.**/
 function filterSearchResults(markers)
 {
 		//If a region is selected, go through the list of markers and remove any that are not in the selected regions.
@@ -299,6 +303,7 @@ function filterSearchResults(markers)
 	centerMap(markers);
 }
 
+/**Set all of the markers onto the map.**/
 function setMarkers(markersToSet)
 {
 	for (var i = 0; i < markersToSet.length; i++)
@@ -306,6 +311,8 @@ function setMarkers(markersToSet)
 		markersToSet[i].setMap(map);
 	}
 }
+
+/**Sets up the searchbox so that pressing enter initaties the search.**/
 function setupSearchBox()
 {
 
@@ -316,10 +323,4 @@ function setupSearchBox()
   google.maps.event.addListener(searchBox, 'places_changed', performSearch = function() {
 	fireSearch();
   });
-}
-
-
-function searchPlaces()
-{
-	
 }
