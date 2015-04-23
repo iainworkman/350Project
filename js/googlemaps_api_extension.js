@@ -182,7 +182,7 @@ function fireSearch()
 	{
 			 places = [];
 	 clearMarkers();
-		
+		placeMarkerPairs = [];
 		 //If the places were retreived. 
 		  if (status == google.maps.places.PlacesServiceStatus.OK) 
 		  {
@@ -198,11 +198,12 @@ function fireSearch()
 				};
 				var marker = new google.maps.Marker({
 					icon: image,
-					title: places[i].name + "\nAddress: " + places[i].formatted_address,
+					title: "Name: " + places[i].name + "\nAddress: " + places[i].formatted_address,
 					position: places[i].geometry.location
 					
 				});
 				markers[i] = marker;
+				placeMarkerPairs.push(new PlaceMarkerPair(places[i], marker));
 			}
 			 if (isRegionSelected())
 			 {
@@ -213,7 +214,7 @@ function fireSearch()
 
 				 setMarkers(markers);
 				 centerMap(markers);
-				 
+				 setPlaceMarkerDetails();
 
 			 }
 		  }
@@ -312,12 +313,134 @@ function filterSearchResults(markers)
 		centerMap(markersToKeep);
 		markers = markersToKeep;
 	}
+	
+	for (var i = 0; i < placeMarkerPairs.length; i++)
+	{
+		var found = false;
+		for (var j = 0; j <  markersToKeep.length; j++)
+		{
+			if (markersToKeep[j] == placeMarkerPairs[i].marker)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			placeMarkerPairs.splice(i,1);
+		}
+	}
+	
+	
+	setPlaceMarkerDetails();
 
 	
 }
 
-/**
- * Removes all markers from the map and clears the list of markers.
+/**Sets the markers that are currently on the map to have updated informatino based on their corresponding place.
+
+**/
+var succeeded = false;
+function setPlaceMarkerDetails()
+{
+	var interval = 2000;
+	for (var i = 0; i < placeMarkerPairs.length; i++)
+	{
+		var placeMarkerPair = placeMarkerPairs[i];
+		
+		var request = 
+		{
+			placeId: placeMarkerPair.place.place_id
+			
+		};
+		
+		
+		var callback = function(place, status) 
+		{
+			
+
+			if (status != google.maps.places.PlacesServiceStatus.OK)
+			{
+				
+				//alert("reached here, resetting.");
+				
+				setTimeout(sendRequest, interval, request,callback);
+				interval = interval + 2000;
+				if (interval > 10000)
+				{
+					interval = 2000;
+				}
+				return;
+
+			}
+			else if (status = google.maps.places.PlacesServiceStatus.OK) 
+			{
+				console.log(place);
+				
+				for (var k = 0; k < placeMarkerPairs.length; k++)
+				{
+					if (placeMarkerPairs[k].place.place_id == place.place_id)
+					{
+						placeMarkerPair = placeMarkerPairs[k];
+					}
+				}
+				placeMarkerPair.marker.title = "Name: " + place.name + "\nAddress: " + place.formatted_address + "\nPhone Number: ";
+				
+				if (place.international_phone_number != null)
+				{
+					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPhone Number: " + place.international_phone_number;
+				}
+				
+				else if (place.formatted_phone_number != null)
+				{
+					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPhone Number: " + place.formatted_phone_number;
+				}
+				
+				if (place.website != null)
+				{
+					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nWebsite: " + place.website;
+				}
+				
+				if (place.photos != null)
+				{
+					placeMarkerPair.marker.icon = place.photos[0].getUrl({'maxWidth': 35, 'maxHeight': 35});
+				}
+				
+				if (place.permanently_closed != null && place.permanently_closed)
+				{
+					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPermanently Closed.";
+				}
+				else if (place.opening_hours != null && place.opening_hours.open_now != null && place.opening_hours.open_now)
+				{
+					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nOpen Now";
+				}
+				
+				if (place.rating != null)
+				{
+					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nRating /5: " + place.rating;
+				}
+				
+				if (placeMarkerPair.place.price_level != null)
+				{
+					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPrice Rating: " + placeMarkerPair.place.price_level;
+				}
+				
+				
+				
+				placeMarkerPair.marker.icon = place.icon
+			}
+		}
+		sendRequest(request,callback);
+	}
+}
+
+/**Sends a placeDetails request to google.**/
+function sendRequest(request,callback)
+{
+	var service = new google.maps.places.PlacesService(map);
+		service.getDetails(request, callback);
+}
+ /** Removes all markers from the map and clears the list of markers.
  */ 
 function clearMarkers() {
     for (var iMarker = 0, markerCount = markers.length;
