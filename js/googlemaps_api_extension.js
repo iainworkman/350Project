@@ -332,6 +332,7 @@ function filterSearchResults(markers)
 		}
 	}
 	
+	
 	setPlaceMarkerDetails();
 
 	
@@ -340,7 +341,7 @@ function filterSearchResults(markers)
 /**Sets the markers that are currently on the map to have updated informatino based on their corresponding place.
 
 **/
-
+var succeeded = false;
 function setPlaceMarkerDetails()
 {
 	var interval = 2000;
@@ -351,6 +352,7 @@ function setPlaceMarkerDetails()
 		var request = 
 		{
 			placeId: placeMarkerPair.place.place_id
+			
 		};
 		
 		
@@ -360,6 +362,7 @@ function setPlaceMarkerDetails()
 
 			if (status != google.maps.places.PlacesServiceStatus.OK)
 			{
+				
 				//alert("reached here, resetting.");
 				
 				setTimeout(sendRequest, interval, request,callback);
@@ -373,9 +376,11 @@ function setPlaceMarkerDetails()
 			}
 			else if (status = google.maps.places.PlacesServiceStatus.OK) 
 			{
+				console.log(place);
+				
 				for (var k = 0; k < placeMarkerPairs.length; k++)
 				{
-					if (placeMarkerPairs[k].place.id == place.id)
+					if (placeMarkerPairs[k].place.place_id == place.place_id)
 					{
 						placeMarkerPair = placeMarkerPairs[k];
 					}
