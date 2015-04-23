@@ -57,7 +57,7 @@
                     <div class="side-bar-button">
                         <a class="btn btn-primary" href="#menu-toggle" id="menu-toggle">Zones</a>
                         <a class="btn btn-primary" href="#add-zone" id="add-zone" style="display:none">Add Zone</a>
-                        <a class="btn btn-primary" href="" id="auth-button">Login</a>
+                        <a class="btn btn-primary" href="" id="auth-button">Sign In</a>
                     </div>
                     <div id="map-container">
 
@@ -225,7 +225,14 @@
                     return;
                 
                 lastLoadCenter = map.getCenter();              
-                loadRegions(authMod.getUserEmail(), map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
+                
+                var currentUserEmail;
+                if(authMod.isUserLoggedIn())
+                    currentUserEmail = authMod.getUserEmail()
+                else
+                    currentUserEmail = "";
+                
+                loadRegions(currentUserEmail, map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
 
                     var resultRegions = results.regions;
                     var numberOfDbRegions = resultRegions.length;
