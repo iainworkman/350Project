@@ -84,7 +84,6 @@ function saveRegionToDB(userId, region, onSave)
 	
 	httpRequest("POST","php/saveRegion.php",params,
 	function onSuccess(response) {
-
 		var jsonResponse = JSON.parse(response);
 		if (jsonResponse == null)
 		{
