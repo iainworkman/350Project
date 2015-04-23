@@ -114,6 +114,8 @@
         <!-- Authorization code -->
         <script src="js/auth.js" type="text/javascript"></script>
 		
+		<!--The placeMarkerPair object -->
+		<script type="text/javascript" src="js/PlaceMarkerPair.js"></script>
         <script>
             /// The current polygon being added as a zone
             var activePolygon;
@@ -136,6 +138,9 @@
 			var places = [];
 			//Holder for places of interest that are looked up in a search.
 			var markers = [];
+			//Keeps the current markers on the map and the places bound together.
+			var placeMarkerPairs = [];
+			
 	        // Create the search box and link it to the UI element. 
 			var input = /** @type {HTMLInputElement} */(
 				document.getElementById('searchbox'));
@@ -161,7 +166,8 @@
                 lastLoadCenter = map.getCenter();
 
                 drawingManager = new google.maps.drawing.DrawingManager({
-                    drawingMode: google.maps.drawing.OverlayType.MARKER,
+					drawingMod: null,
+                    //drawingMode: google.maps.drawing.OverlayType.MARKER,
                     drawingControl: false,
                     polygonOptions: {
                         editable: true,
