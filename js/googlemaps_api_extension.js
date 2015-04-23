@@ -155,6 +155,7 @@ function saveRegion(regionName,regionDescription)
 			region.getPolygon().setMap(null);
 			doLoad = true;
 			updateRegions();
+			
 		});
 }
 
@@ -355,5 +356,73 @@ function setupSearchBox()
   google.maps.event.addListener(searchBox, 'places_changed', performSearch = function() {
 	fireSearch();
   });
+  
+  /**Delete the given region.
+  @region -> the region to delete.
+  **/
+  //The user pressed no.
+  function deleteRegion(region)
+  {
+				if(!confirm("Are You Sure?"))
+					return;
+				
+			
+				var regionID = region.id;
+				
+				
+				httpRequest("POST", "php/deleteRegion.php", ("regionID=" + regionID), 
+				function onSuccess(response) {
+					if (response != null)
+					{
+						//states whether or not the region was deleted.
+						//alert(response);
+					}
+				}, 
+				function onFailure(response)
+				{
+					if (response!=null)
+					{
+						alert("The request failed for the following reasion:\n" + response);
+					}
+					else
+					{
+						alert("The request failed.");
+					}
+				});
+				
+				for (var i = 0; i < regionList.length; i++)
+				{
+					if (regionList[i].id == regionID)
+					{
+						removeCurrentRegion(regionList[i]);
+					}
+				}
+			
+  }
+
+  /**Edit the region with the given polygon.
+  @polygon -> The polygon  that was edited.
+  **/
+  function editRegionWithPolygon(polygon)
+  {
+	  var regionToEdit;
+	  for (var i = 0; i < regionList.length; i++)
+	  {
+		  if (regionList[i].polygon === polygon)
+		  {
+			  regionToEdit = regionList[i];
+		  }
+	  }
+	  if (regionToEdit == null)
+	  {
+		  alert("There is no regiond to edit.");
+		  return;
+	  }
+	  
+	  deleteRegion(regionToEdit);
+	  activePolygon = polygon;
+	  saveRegion(region.name, region.description);
+	  
+  }
 }
 

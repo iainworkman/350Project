@@ -213,10 +213,10 @@
                         //alert("This was a position click");
                     }
 
-                });
+                });			
 
-                
-            }
+			}         
+            
             
             
             // refreshes the list of regions with items from the database dependent on the current center of the map            
@@ -315,7 +315,9 @@
                     regionCoords.push(new google.maps.LatLng(region.coordinates[iRegionCoord].latitude, region.coordinates[iRegionCoord].longitude));
                 }
                 
-                region.polygon = new google.maps.Polygon({
+				if (region.owner == "admin")
+				{
+					region.polygon = new google.maps.Polygon({
                     paths: regionCoords,
                     strokeColor: '#FF0000',
                     strokeOpacity: 0.8,
@@ -323,6 +325,22 @@
                     fillColor: '#FF0000',
                     fillOpacity: 0.35
                 });
+				}
+				else
+				{
+					region.polygon = new google.maps.Polygon({
+					paths: regionCoords,
+					editable: true,
+					fillColor: 'BLUE',
+					strokeOpacity: 0.8,
+                    strokeWeight: 2,
+					fillOpacity: 0.35,
+					draggable: true,
+					clickable: true,
+					strokeColor: 'GREEN'
+			
+				});
+				}
                 
                 // Ensures that the isActive data exists for the region, and that it is false
                 region.isActive = false;
@@ -348,7 +366,7 @@
 					deleteButton.setAttribute('class','btn btn-danger');
 					deleteButton.value='Delete';
 					deleteButton.setAttribute('type', 'button');
-					deleteButton.setAttribute('onclick','deleteRegion(this)');
+					deleteButton.setAttribute('onclick','deleteRegionByButton(this)');
 					deleteButton.setAttribute("style", "width: 75%;");
 					regionListItem.appendChild(regionListItemToggle);
 					regionListItem.appendChild(deleteButton);
@@ -412,7 +430,7 @@
 			
 			/**Delete the region using the given delete button element.
 			**/
-			function deleteRegion(listElement)
+			function deleteRegionByButton(listElement)
 			{
 				//The user pressed no.
 				if(!confirm("Are You Sure?"))
@@ -457,6 +475,7 @@
                 google.maps.event.addListener(overlay, "mouseup", function (event) {
                     activePolygon = overlay;
                     console.debug(overlay);//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
+					editRegionWithPolygon(overlay);
                 });
             }
 
