@@ -34,11 +34,11 @@
                     </li>
                     <li>
                         My Zones
-                        <ol id="userZonesList"></ol>
+                        <ul id="userZonesList"></ul>
                     </li>
                     <li>
                         Global Zones
-                        <ol id="globalZonesList"></ol>
+                        <ul id="globalZonesList"></ul>
                     </li>
                 </ul>
             </div> <!-- /#sidebar-wrapper -->
@@ -121,7 +121,7 @@
             var authMod = new authMod();
             var handleGoogleClientLoad = authMod.handleClientLoad;            
             /// The LatLng of the center of the map the last time that the data was refreshed.
-            var lastLoadCenter;
+            var lastLoadCenter = null;
             var doLoad = true;
             var regionList = new Array();
 			
@@ -164,19 +164,20 @@
 
                 // Handler to detect when the user has dragged the map. Checks if the distance for the drag is sufficient
                 // to trigger a refresh of the data, and if it is performs said data refresh
-                google.maps.event.addListener(map, 'center_changed', function (event) {
+                google.maps.event.addListener(map, 'center_changed', checkForUpdate = function (event) {
 
                     var currentCenter = map.getCenter();
                     var travelledDistanceSinceLastLoad = google.maps.geometry.spherical.computeDistanceBetween(currentCenter, lastLoadCenter);
 
-                    if (travelledDistanceSinceLastLoad < 10000) {
+                    if (!lastLoadCenter == null && travelledDistanceSinceLastLoad < 10000) {
+						
                         return;
                     } else {
+					
                         updateRegions();
                     }
                 });
-
-
+				checkForUpdate(null);
                 // Handler to detect when the user has zoomed in or out of the map. When the user zooms out, at a certain level of zoom we
                 // stop loading regions and clear the list. When the user zooms back in we restart loading.
                 google.maps.event.addListener(map, 'zoom_changed', function (event) {
@@ -224,20 +225,24 @@
                     return;
                 
                 lastLoadCenter = map.getCenter();              
-                
-
                 loadRegions(authMod.getUserEmail(), map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
 
                     var resultRegions = results.regions;
                     var numberOfDbRegions = resultRegions.length;
                     var numberOfCurrentRegions = regionList.length;
                     
-					
+					for(var i = 0; i < numberOfDbRegions; i++)
+					{
+						if (regionList[i] == null)
+						{
+							alert("null reached before first loop at position: " + i);
+						}
+					}
                     // Remove all current regions not in results regions (they've gone too far away)
                     var regionsToRemove = new Array();
                     var found = false;
-                    for (var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; ++iCurrentRegion) {
-                        for(var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; ++iLoadedRegion) {
+                    for (var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
+                        for(var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
                             if(regionList[iCurrentRegion].id === resultRegions[iLoadedRegion].id) {
                                 found = true;   
                             }
@@ -249,14 +254,25 @@
                         found = false;
                     }
                     
-                    var numberOfRegionsToRemove = regionsToRemove.length;
-                    for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; ++iRegionToRemove) {
-                        removeCurrentRegion(regionsToRemove[iRegionToRemove]);
-                    }
+					for(var i = 0; i < numberOfDbRegions; i++)
+					{
+						if (regionList[i] == null)
+						{
+							alert("null reached before second loop at position: " + i);
+						}
+					}
+
                     
+					for(var i = 0; i < numberOfDbRegions; i++)
+					{
+						if (regionList[i] == null)
+						{
+							alert("null reached before third loop at position: " + i);
+						}
+					}
                     // Add all results regions not in current regions (they're new to the loaded area)
-                    for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; ++iLoadedRegion) {
-                        for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; ++iCurrentRegion) {
+                    for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
+                        for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
                             if(resultRegions[iLoadedRegion].id === regionList[iCurrentRegion].id) {
                                 found = true;   
                             }
@@ -266,6 +282,11 @@
                             addLoadedRegion(resultRegions[iLoadedRegion]);   
                         }
                         found = false;
+                    }
+					
+					var numberOfRegionsToRemove = regionsToRemove.length;
+                    for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
+                        removeCurrentRegion(regionsToRemove[iRegionToRemove]);
                     }
                     
                 });                
@@ -327,7 +348,7 @@
                 var regionListItemToggle = document.createElement('a');
                 regionListItem.setAttribute('id', region.id);
                 regionListItemToggle.setAttribute('class', 'list-element');
-                regionListItemToggle.setAttribute('style', 'padding: 2px; margin: 2px; float: left;');
+               // regionListItemToggle.setAttribute('style', 'padding: 2px; margin: 2px; float: left;');
                 regionListItemToggle.setAttribute('onclick', 'toggleRegion(this)');
                 regionListItemToggle.innerHTML = region.name;
                 
@@ -339,17 +360,18 @@
                 } else {
                     parent = document.getElementById('userZonesList');
 					var deleteButton = document.createElement('input');
-					deleteButton.setAttribute('class','deleteButton');
+					deleteButton.setAttribute('class','btn btn-danger');
 					deleteButton.value='Delete';
 					deleteButton.setAttribute('type', 'button');
 					deleteButton.setAttribute('onclick','deleteRegion(this)');
+					deleteButton.setAttribute("style", "width: 75%;");
 					regionListItem.appendChild(regionListItemToggle);
 					regionListItem.appendChild(deleteButton);
 
 					
 									
                 }
-                
+                regionListItemToggle.setAttribute("style","width:75%;");
                 parent.appendChild(regionListItem);
             }
             
@@ -369,28 +391,35 @@
             
             // Toggles a region as being active/inactive based on the element passed
             function toggleRegion(regionElement) {
-                
+                alert("got to toggle region");
                 // Change style of element to indicate that it has been toggled
                 if(regionElement.getAttribute('class') === "list-element-active") {
                     regionElement.setAttribute('class', 'list-element');
                 } else {
                     regionElement.setAttribute('class', 'list-element-active');
                 }
-                
-                var regionId = regionElement.id;
+
+                var regionId = regionElement.parentNode.id;
+				
                 var numberOfRegions = regionList.length;
                 
                 for(var iRegion = 0; iRegion < numberOfRegions; ++iRegion) {
                     var currentRegion = regionList[iRegion];
-				
+
+					
                     if(currentRegion.id == regionId) {
 					
                         currentRegion.isActive = !(currentRegion.isActive);
-                     
+					
                         if(currentRegion.isActive)
+						{
+													
                             currentRegion.polygon.setMap(map);
+						}
+
                         else
                             currentRegion.polygon.setMap(null);
+						break;
                     }
                 }
             }
@@ -400,9 +429,9 @@
 			**/
 			function deleteRegion(listElement)
 			{
-				alert('delete button pressed');
+				
 				var listElement = listElement.parentNode;
-				alert("list element id: " + listElement.id);
+			
 				var regionID = listElement.id;
 				
 				
@@ -432,7 +461,7 @@
 						removeCurrentRegion(regionList[i]);
 					}
 				}
-				listElement.parentNode.removeChild(listElement);
+			//	listElement.parentNode.removeChild(listElement);
 
 			}
             //this will grab the coordinates from the drawing manager on mouse up.
