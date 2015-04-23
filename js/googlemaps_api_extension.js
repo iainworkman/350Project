@@ -152,6 +152,7 @@ function saveRegion(regionName,regionDescription)
 
 			//This sets the region id of the newly saved region. The response from saveRegion.php is the new region id.
 			region.setID(results);
+			region.getPolygon().setMap(null);
 			doLoad = true;
 			updateRegions();
 		});
