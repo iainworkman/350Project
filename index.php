@@ -115,21 +115,28 @@
         <script src="js/auth.js" type="text/javascript"></script>
 		
         <script>
+            /// The current polygon being added as a zone
             var activePolygon;
+            /// The map object
             var map;
+            /// The drawing manager. Used to allow the user to draw zones on the map
             var drawingManager;
+            /// The authorization module. Used to validate the user based on Google OAuth
             var authMod = new authMod();
+            /// A handle to the client load procedure in the authorization module. Allows it to be tied to a page load event
             var handleGoogleClientLoad = authMod.handleClientLoad;            
             /// The LatLng of the center of the map the last time that the data was refreshed.
             var lastLoadCenter = null;
+            /// Whether the page is currently loading regions - the page stops loading regions when zoomed out too much
             var doLoad = true;
+            /// A collection of all the regions loaded from the database.
             var regionList = new Array();
 			
 			//The places that are found in a result search.
 			var places = [];
 			//Holder for places of interest that are looked up in a search.
 			var markers = [];
-	  // Create the search box and link it to the UI element. 
+	        // Create the search box and link it to the UI element. 
 			var input = /** @type {HTMLInputElement} */(
 				document.getElementById('searchbox'));
  
@@ -137,7 +144,10 @@
 				/** @type {HTMLInputElement} */(input));
 				
 			
-				
+			/**
+             * A function which initializes the map in the page, and wires up all the required event. 
+             * For now this ccenters the map on Saskatoon - in order to avoid requesting Geolocation positions. 
+             */
             function initialize() {
                 var mapOptions = {
                     zoom: 14,
@@ -178,6 +188,7 @@
                     }
                 });
 				checkForUpdate(null);
+                
                 // Handler to detect when the user has zoomed in or out of the map. When the user zooms out, at a certain level of zoom we
                 // stop loading regions and clear the list. When the user zooms back in we restart loading.
                 google.maps.event.addListener(map, 'zoom_changed', function (event) {
@@ -219,7 +230,11 @@
             }
             
             
-            // refreshes the list of regions with items from the database dependent on the current center of the map            
+            /**
+             * Loads the regions from the database using the current logged in user (if any) and the center position of the map
+             * Then ensures that all returned based on those criteria are shown in the list, and that none which aren't are still
+             * displayed.
+             */
             function updateRegions() {
                 if(!doLoad)
                     return;
@@ -306,11 +321,14 @@
                 $("#" + region.id).remove();
                 
             }
-                        
-            // Function which adds all the required stuff for a region:
-            // - The menu item for that region
-            // - The polygon for that region
-            // - Appends the region to the regionList
+            
+            /**
+             * Adds all the required stuff for a single region, including:
+             *  - The menu item for that region (user or global)
+             *  - The polygon for that region
+             *  - The entry for that region in the regionList
+             * @param region ~ The region whose information is to be added
+             */
             function addLoadedRegion(region) {
                 
                 // Append to regionList
@@ -367,8 +385,13 @@
                 parent.appendChild(regionListItem);
             }
             
-            // Helper methods which returns the index of the provided region in the regionList
-            // If the region is not found, then returns -1
+            /**
+             * Helper method which returns the index of the provided region in the
+             * regionList. If the region is not in the regionList, then -1 is
+             * returned.
+             * @param region ~ The region whose index position in regionList is to be
+             * returned
+             */
             function indexOfRegion(region) {
                 
                 var numberOfRegions = regionList.length;
@@ -381,7 +404,12 @@
                 return -1;
             }
             
-            // Toggles a region as being active/inactive based on the element passed
+            /**
+             * Toggles a region between the Active/Inactive state, as well as updates the
+             * relevant elements on the base based on this:
+             *  - Alters the CSS of the elements entry in the side list to indicate its active state
+             *  - Sets its visual polygon to be visible 
+             */
             function toggleRegion(regionElement) {
                 
                 // Change style of element to indicate that it has been toggled
@@ -417,8 +445,10 @@
             }
             
 			
-			/**Delete the region using the given delete button element.
-			**/
+			/*
+             * Deletes the region using the given delete button element.
+             * @param listElement ~ The deleteButton element of the region to be deleted.
+			 */
 			function deleteRegion(listElement)
 			{
 				//The user pressed no.
@@ -459,6 +489,7 @@
 			//	listElement.parentNode.removeChild(listElement);
 
 			}
+            
             //this will grab the coordinates from the drawing manager on mouse up.
             function overlayMouseUpListener(overlay) {
                 google.maps.event.addListener(overlay, "mouseup", function (event) {
