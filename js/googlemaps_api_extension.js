@@ -379,7 +379,7 @@ function setPlaceMarkerDetails()
 				
 				for (var k = 0; k < placeMarkerPairs.length; k++)
 				{
-					if (placeMarkerPairs[k].place.place_id == place.place_id)
+					if (placeMarkerPairs[k].place.place_id == place.place_id || placeMarkerPairs[k].place.id == place.id)
 					{
 						placeMarkerPair = placeMarkerPairs[k];
 					}
