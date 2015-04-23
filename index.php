@@ -231,13 +231,7 @@
                     var numberOfDbRegions = resultRegions.length;
                     var numberOfCurrentRegions = regionList.length;
                     
-					for(var i = 0; i < numberOfDbRegions; i++)
-					{
-						if (regionList[i] == null)
-						{
-							alert("null reached before first loop at position: " + i);
-						}
-					}
+
                     // Remove all current regions not in results regions (they've gone too far away)
                     var regionsToRemove = new Array();
                     var found = false;
@@ -254,26 +248,20 @@
                         found = false;
                     }
                     
-					for(var i = 0; i < numberOfDbRegions; i++)
-					{
-						if (regionList[i] == null)
-						{
-							alert("null reached before second loop at position: " + i);
-						}
-					}
 
-                    
-					for(var i = 0; i < numberOfDbRegions; i++)
-					{
-						if (regionList[i] == null)
-						{
-							alert("null reached before third loop at position: " + i);
-						}
-					}
+
+					
+                    var numberOfRegionsToRemove = regionsToRemove.length;
+                    for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
+                        removeCurrentRegion(regionsToRemove[iRegionToRemove]);
+                    }
+					
+
+					
                     // Add all results regions not in current regions (they're new to the loaded area)
                     for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
                         for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
-                            if(resultRegions[iLoadedRegion].id === regionList[iCurrentRegion].id) {
+                            if(resultRegions[iLoadedRegion] != null && regionList[iCurrentRegion] != null && resultRegions[iLoadedRegion].id === regionList[iCurrentRegion].id) {
                                 found = true;   
                             }
                         }
@@ -284,10 +272,7 @@
                         found = false;
                     }
 					
-					var numberOfRegionsToRemove = regionsToRemove.length;
-                    for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
-                        removeCurrentRegion(regionsToRemove[iRegionToRemove]);
-                    }
+
                     
                 });                
             } 
@@ -391,7 +376,7 @@
             
             // Toggles a region as being active/inactive based on the element passed
             function toggleRegion(regionElement) {
-                alert("got to toggle region");
+                
                 // Change style of element to indicate that it has been toggled
                 if(regionElement.getAttribute('class') === "list-element-active") {
                     regionElement.setAttribute('class', 'list-element');
@@ -429,7 +414,9 @@
 			**/
 			function deleteRegion(listElement)
 			{
-				
+				//The user pressed no.
+				if(!confirm("Are You Sure?"))
+					return;
 				var listElement = listElement.parentNode;
 			
 				var regionID = listElement.id;
@@ -439,7 +426,8 @@
 				function onSuccess(response) {
 					if (response != null)
 					{
-						alert(response);
+						//states whether or not the region was deleted.
+						//alert(response);
 					}
 				}, 
 				function onFailure(response)

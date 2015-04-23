@@ -155,7 +155,6 @@ function saveRegion(regionName,regionDescription)
 			region.getPolygon().setMap(null);
 			doLoad = true;
 			updateRegions();
-			toggleRegion( $("#" + region.getRegionID()));
 		});
 }
 
