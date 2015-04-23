@@ -199,7 +199,7 @@ function fireSearch()
 				};
 				var marker = new google.maps.Marker({
 					icon: image,
-					title: places[i].name + "\nAddress: " + places[i].formatted_address,
+					title: "Name: " + places[i].name + "\nAddress: " + places[i].formatted_address,
 					position: places[i].geometry.location
 					
 				});
@@ -343,10 +343,11 @@ function filterSearchResults(markers)
 
 function setPlaceMarkerDetails()
 {
-	alert("length: " + placeMarkerPairs.length);
+	var interval = 2000;
 	for (var i = 0; i < placeMarkerPairs.length; i++)
 	{
 		var placeMarkerPair = placeMarkerPairs[i];
+		
 		var request = 
 		{
 			placeId: placeMarkerPair.place.place_id
@@ -355,13 +356,20 @@ function setPlaceMarkerDetails()
 		
 		var callback = function(place, status) 
 		{
-			alert(status);
+			
 
-			if (status == google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT)
+			if (status != google.maps.places.PlacesServiceStatus.OK)
 			{
-				alert("this was reached, resetting");
-				setTimeout(sendRequest(request,callback), 2000);
+				//alert("reached here, resetting.");
 				
+				setTimeout(sendRequest, interval, request,callback);
+				interval = interval + 2000;
+				if (interval > 10000)
+				{
+					interval = 2000;
+				}
+				return;
+
 			}
 			else if (status = google.maps.places.PlacesServiceStatus.OK) 
 			{
@@ -372,7 +380,7 @@ function setPlaceMarkerDetails()
 						placeMarkerPair = placeMarkerPairs[k];
 					}
 				}
-				placeMarkerPair.marker.title = "Changed Title!" + "Name: " + place.name + "\nAddress: " + place.formatted_address + "\nPhone Number: ";
+				placeMarkerPair.marker.title = "Name: " + place.name + "\nAddress: " + place.formatted_address + "\nPhone Number: ";
 				
 				if (place.international_phone_number != null)
 				{
@@ -408,8 +416,13 @@ function setPlaceMarkerDetails()
 					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nRating /5: " + place.rating;
 				}
 				
+				if (placeMarkerPair.place.price_level != null)
+				{
+					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPrice Rating: " + placeMarkerPair.place.price_level;
+				}
 				
-				console.debug(place);
+				
+				
 				placeMarkerPair.marker.icon = place.icon
 			}
 		}
@@ -417,6 +430,7 @@ function setPlaceMarkerDetails()
 	}
 }
 
+/**Sends a placeDetails request to google.**/
 function sendRequest(request,callback)
 {
 	var service = new google.maps.places.PlacesService(map);
