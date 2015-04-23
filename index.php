@@ -127,7 +127,7 @@
             var handleGoogleClientLoad = authMod.handleClientLoad;            
             /// The LatLng of the center of the map the last time that the data was refreshed.
             var lastLoadCenter = null;
-            /// Whether the page is currently loading regions - the page stops loading regions when zoomed out too much
+            /// Whether the page is currently loading regions - the page waits for the current request to be returned before it tries another.
             var doLoad = true;
             /// A collection of all the regions loaded from the database.
             var regionList = new Array();
@@ -189,19 +189,6 @@
                 });
 				checkForUpdate(null);
                 
-                // Handler to detect when the user has zoomed in or out of the map. When the user zooms out, at a certain level of zoom we
-                // stop loading regions and clear the list. When the user zooms back in we restart loading.
-                google.maps.event.addListener(map, 'zoom_changed', function (event) {
-                    if (map.getZoom() < 10 && doLoad === true) {
-                        doLoad = false;
-                        
-                    } else if (map.getZoom() >= 10 && doLoad === false) {
-                        doLoad = true;
-                        
-                    }
-
-                });
-
                 //This will grab the coordinates of a region upon creation as well as well as allow grabbing them on edit.
                 google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
 
@@ -224,9 +211,7 @@
                         //alert("This was a position click");
                     }
 
-                });
-
-                
+                });                
             }
             
             
@@ -247,6 +232,7 @@
                 else
                     currentUserEmail = "";
                 
+                doLoad = false;
                 loadRegions(currentUserEmail, map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
 
                     var resultRegions = results.regions;
@@ -254,48 +240,51 @@
                     var numberOfCurrentRegions = regionList.length;
                     
 
-                    // Remove all current regions not in results regions (they've gone too far away)
-                    var regionsToRemove = new Array();
-                    var found = false;
-                    for (var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
-                        for(var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
-                            if(regionList[iCurrentRegion].id === resultRegions[iLoadedRegion].id) {
-                                found = true;   
+                    if(regionList.length == 0) {
+                        // Just add the regions
+                        for(var iCurrentRegion = 0; iCurrentRegion < resultRegions.length; iCurrentRegion++) {
+                            addLoadedRegion(resultRegions[iCurrentRegion]);
+                        }
+                    } else {                        
+                        // Remove all current regions not in results regions (they've gone too far away)
+                        var regionsToRemove = new Array();
+                        var found = false;
+                        for (var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
+                            for(var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions && !found; iLoadedRegion++) {
+                                if(regionList[iCurrentRegion].id == resultRegions[iLoadedRegion].id) {
+                                    found = true;   
+                                }
+                            }
+
+                            if (!found) {
+                                regionsToRemove.push(regionList[iCurrentRegion]);   
+                            }
+                            found = false;
+                        }
+
+                        var numberOfRegionsToRemove = regionsToRemove.length;
+                        for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
+                            removeCurrentRegion(regionsToRemove[iRegionToRemove]);
+                        }
+
+
+
+                        // Add all results regions not in current regions (they're new to the loaded area)
+                        for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
+                            found = false;
+
+                            for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions && !found; iCurrentRegion++) {
+                                if(resultRegions[iLoadedRegion] != null && regionList[iCurrentRegion] != null && resultRegions[iLoadedRegion].id == regionList[iCurrentRegion].id) {
+                                    found = true;   
+                                }
+                            }
+
+                            if(!found) {
+                                addLoadedRegion(resultRegions[iLoadedRegion]);   
                             }
                         }
-                        
-                        if (!found) {
-                            regionsToRemove.push(regionList[iCurrentRegion]);   
-                        }
-                        found = false;
                     }
-                    
-
-
-					
-                    var numberOfRegionsToRemove = regionsToRemove.length;
-                    for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
-                        removeCurrentRegion(regionsToRemove[iRegionToRemove]);
-                    }
-					
-
-					
-                    // Add all results regions not in current regions (they're new to the loaded area)
-                    for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
-                        for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
-                            if(resultRegions[iLoadedRegion] != null && regionList[iCurrentRegion] != null && resultRegions[iLoadedRegion].id === regionList[iCurrentRegion].id) {
-                                found = true;   
-                            }
-                        }
-                        
-                        if(!found) {
-                            addLoadedRegion(resultRegions[iLoadedRegion]);   
-                        }
-                        found = false;
-                    }
-					
-
-                    
+                    doLoad = true;
                 });                
             } 
 
@@ -304,7 +293,7 @@
             // - removes it from the regionList
             // - removes the menu item for that region
             function removeCurrentRegion(region) {
-                
+
                 // remove poly from map if it is active
                 if(region.isActive) {
                     region.polygon.setMap(null);   
@@ -314,12 +303,11 @@
                 var regionIndex = indexOfRegion(region);
                 
                 if(regionIndex > -1) {
-                    regionList.splice(regionIndex);   
+                    regionList.splice(regionIndex,1);   
                 }
                 
                 // Remove the menu item
                 $("#" + region.id).remove();
-                
             }
             
             /**
