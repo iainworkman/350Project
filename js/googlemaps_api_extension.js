@@ -109,9 +109,8 @@ function saveRegionToDB(userId, region, onSave)
 
 
 
-/*TODO: Implement a method to allow for the editing of polygons.
-*/
-/*This removed the currently active polygon from the map.
+
+/*This removed theactivePolygon from the map.
 */
 function removePolygon()
 {
@@ -129,8 +128,8 @@ function removePolygon()
 
 /*This creates and saves a region to the database given the region's name and description.
 	This also
- * @param - regionName ~ The region name to be saved.
- * @param - regionDescription ~ the region description.
+ * @Param - regionName ~ The region name to be saved.
+ * @Param - regionDescription ~ the region description.
  *
 */
 function saveRegion(regionName,regionDescription)
@@ -158,7 +157,7 @@ function saveRegion(regionName,regionDescription)
 		});
 }
 
-/**Initiates the search.
+/**Initiates the search. This is performed when the search button is pressed, or the enter key is pressed while the searchbox has focus.
 This is the documentation for a places search. 
 //https://developers.google.com/maps/documentation/javascript/places#place_details**/
 function fireSearch()
@@ -185,14 +184,7 @@ function fireSearch()
 			 places = [];
 	 clearMarkers();
 		
-		/**
-		ERROR: There was a problem contacting the Google servers.
-INVALID_REQUEST: This request was invalid.
-OK: The response contains a valid result.
-OVER_QUERY_LIMIT: The webpage has gone over its request quota.
-REQUEST_DENIED: The webpage is not allowed to use the PlacesService.
-UNKNOWN_ERROR: The PlacesService request could not be processed due to a server error. The request may succeed if you try again.
-ZERO_RESULTS: No result was found for this request.**/
+		 //If the places were retreived. 
 		  if (status == google.maps.places.PlacesServiceStatus.OK) 
 		  {
 			for (var i = 0; i < results.length; i++) 
@@ -256,7 +248,7 @@ ZERO_RESULTS: No result was found for this request.**/
 	/**@return: true if a region is selected, false if not.**/
 function isRegionSelected()
 {
-	//Determine if a region is selected. IF none are selected, the search will return all results.
+	//Determine if a region is selected. IF none are selected, the search will return false.
 	var regionSelected = false;
 	for (var i = 0; i < regionList.length; i++)
 	{
@@ -268,7 +260,8 @@ function isRegionSelected()
 	return false;
 }
 
-/**Centers the map so that it is at a zoom in which all of ther markesr can be seen.**/
+/**Centers the map so that it is at a zoom in which all of ther markesr can be seen. (the map will zoom to include all of the markers.)
+* @Param centerMarkers ~ The markers to center the map around. **/
 function centerMap(centerMarkers)
 {
 	if (centerMarkers.length >0)
@@ -284,7 +277,9 @@ function centerMap(centerMarkers)
 
 }
 
-/**filters the given markers to be a list of only markers that are actually located in a selected region.**/
+/**filters the given markers to be a list of only markers that are actually located in a selected region.
+@Param markers ~ the markers to search for in each selected region.
+@PostCon ~ markers contains only markers that are located within any of the selected regions.**/
 function filterSearchResults(markers)
 {
 		//If a region is selected, go through the list of markers and remove any that are not in the selected regions.
@@ -335,7 +330,8 @@ function clearMarkers() {
     markers = [];
 }
 
-/**Set all of the markers onto the map.**/
+/**Set all of the markers onto the map.
+@Param markersToSet ~ The markers to set onto the map.**/
 function setMarkers(markersToSet)
 {
 	for (var i = 0; i < markersToSet.length; i++)
@@ -344,7 +340,9 @@ function setMarkers(markersToSet)
 	}
 }
 
-/**Sets up the searchbox so that pressing enter initaties the search.**/
+
+/**Sets up the searchbox so that pressing enter initaties the search.
+Simply ensures that the enter button results in firing a search.**/
 function setupSearchBox()
 {
 

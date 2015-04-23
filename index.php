@@ -146,7 +146,7 @@
 			
 			/**
              * A function which initializes the map in the page, and wires up all the required event. 
-             * For now this ccenters the map on Saskatoon - in order to avoid requesting Geolocation positions. 
+             * For now this centers the map on Saskatoon - in order to avoid requesting Geolocation positions. 
              */
             function initialize() {
                 var mapOptions = {
@@ -288,10 +288,13 @@
                 });                
             } 
 
-            // Function which removes all the required stuff for a region:
-            // - If is active, then removes its polygon from the maps
-            // - removes it from the regionList
-            // - removes the menu item for that region
+            /** Function which removes all the required stuff for a region:
+              If is active, then removes its polygon from the maps
+              removes it from the regionList
+              removes the menu item for that region
+			  @param region ~ The region to remove from the map and regionList.
+			  **/
+			
             function removeCurrentRegion(region) {
 
                 // remove poly from map if it is active
@@ -352,6 +355,7 @@
                 
                 var parent;
                 
+				//Note: We only wish to include delete buttons on user regions.
                 if(region.type === "universal") {
 					parent = document.getElementById('globalZonesList');
 					regionListItem.appendChild(regionListItemToggle);	
@@ -396,7 +400,8 @@
              * Toggles a region between the Active/Inactive state, as well as updates the
              * relevant elements on the base based on this:
              *  - Alters the CSS of the elements entry in the side list to indicate its active state
-             *  - Sets its visual polygon to be visible 
+             *  - Sets its visual polygon to be visible
+			 * @param regionElement ~ the regionElement(anchor element that corresponds to a region) that is to be toggled. 
              */
             function toggleRegion(regionElement) {
                 
