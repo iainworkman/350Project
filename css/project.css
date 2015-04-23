@@ -143,6 +143,12 @@ top: 90%;
 right: 10%;
 }
 
+#deleteButton{
+float:right;
+background-color: red;
+width: 25px;
+height: 25px;
+}
 #map-container { 
     height: 100%;
 }

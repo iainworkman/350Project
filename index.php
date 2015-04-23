@@ -34,11 +34,11 @@
                     </li>
                     <li>
                         My Zones
-                        <div id="userZonesList"></div>
+                        <ul id="userZonesList"></ul>
                     </li>
                     <li>
                         Global Zones
-                        <div id="globalZonesList"></div>
+                        <ul id="globalZonesList"></ul>
                     </li>
                 </ul>
             </div> <!-- /#sidebar-wrapper -->
@@ -46,9 +46,9 @@
                 <div id = "primary-container" class="container-fluid">
                     <div class="search-panel">
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search for...">
+                            <input type="text" class="form-control" placeholder="Search for..." id="searchbox">
                             <span class="input-group-btn">
-                                <button class="btn btn-primary" type="button" >
+                                <button class="btn btn-primary" type="button" onClick="fireSearch()">
                                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                                 </button>
                             </span>
@@ -56,8 +56,8 @@
                     </div>
                     <div class="side-bar-button">
                         <a class="btn btn-primary" href="#menu-toggle" id="menu-toggle">Zones</a>
-                        <a class="btn btn-primary" href="#add-zone" id="add-zone">Add Zone</a>
-                        <a class="btn btn-primary" href="" id="auth-button">Login</a>
+                        <a class="btn btn-primary" href="#add-zone" id="add-zone" style="display:none">Add Zone</a>
+                        <a class="btn btn-primary" href="" id="auth-button">Sign In</a>
                     </div>
                     <div id="map-container">
 
@@ -101,31 +101,58 @@
                 </div>
             </div>
         </div>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places,drawing,geometry"></script>
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>        
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="js/bootstrap.min.js"></script>        
         <!-- Include the GoogleMaps API, with drawing and geometry libraries -->
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing,geometry"></script>
+
         <script type="text/javascript" src="js/Region.js"></script>
         <!-- Our custom code to render the Map examples -->
         <script type="text/javascript" src="js/googlemaps_api_extension.js"></script>
         <!-- Authorization code -->
         <script src="js/auth.js" type="text/javascript"></script>
+		
         <script>
+            /// The current polygon being added as a zone
             var activePolygon;
+            /// The map object
             var map;
+            /// The drawing manager. Used to allow the user to draw zones on the map
             var drawingManager;
-            var handleGoogleClientLoad = new authMod().handleClientLoad;
+            /// The authorization module. Used to validate the user based on Google OAuth
+            var authMod = new authMod();
+            /// A handle to the client load procedure in the authorization module. Allows it to be tied to a page load event
+            var handleGoogleClientLoad = authMod.handleClientLoad;            
             /// The LatLng of the center of the map the last time that the data was refreshed.
-            var lastLoadCenter;
+            var lastLoadCenter = null;
+            /// Whether the page is currently loading regions - the page stops loading regions when zoomed out too much
             var doLoad = true;
+            /// A collection of all the regions loaded from the database.
             var regionList = new Array();
-
+			
+			//The places that are found in a result search.
+			var places = [];
+			//Holder for places of interest that are looked up in a search.
+			var markers = [];
+	        // Create the search box and link it to the UI element. 
+			var input = /** @type {HTMLInputElement} */(
+				document.getElementById('searchbox'));
+ 
+			var searchBox = new google.maps.places.SearchBox(
+				/** @type {HTMLInputElement} */(input));
+				
+			
+			/**
+             * A function which initializes the map in the page, and wires up all the required event. 
+             * For now this ccenters the map on Saskatoon - in order to avoid requesting Geolocation positions. 
+             */
             function initialize() {
                 var mapOptions = {
                     zoom: 14,
-                    center: new google.maps.LatLng(52.1153705, -106.6166251)
+                    center: new google.maps.LatLng(52.1153705, -106.6166251),
+					mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
 
                 map = new google.maps.Map(document.getElementById('map-container'),
@@ -147,19 +174,21 @@
 
                 // Handler to detect when the user has dragged the map. Checks if the distance for the drag is sufficient
                 // to trigger a refresh of the data, and if it is performs said data refresh
-                google.maps.event.addListener(map, 'center_changed', function (event) {
+                google.maps.event.addListener(map, 'center_changed', checkForUpdate = function (event) {
 
                     var currentCenter = map.getCenter();
                     var travelledDistanceSinceLastLoad = google.maps.geometry.spherical.computeDistanceBetween(currentCenter, lastLoadCenter);
 
-                    if (travelledDistanceSinceLastLoad < 10000) {
+                    if (!lastLoadCenter == null && travelledDistanceSinceLastLoad < 10000) {
+						
                         return;
                     } else {
+					
                         updateRegions();
                     }
                 });
-
-
+				checkForUpdate(null);
+                
                 // Handler to detect when the user has zoomed in or out of the map. When the user zooms out, at a certain level of zoom we
                 // stop loading regions and clear the list. When the user zooms back in we restart loading.
                 google.maps.event.addListener(map, 'zoom_changed', function (event) {
@@ -197,27 +226,39 @@
 
                 });
 
-                updateRegions();
+                
             }
             
             
-            // refreshes the list of regions with items from the database dependent on the current center of the map            
+            /**
+             * Loads the regions from the database using the current logged in user (if any) and the center position of the map
+             * Then ensures that all returned based on those criteria are shown in the list, and that none which aren't are still
+             * displayed.
+             */
             function updateRegions() {
                 if(!doLoad)
                     return;
                 
-                lastLoadCenter = map.getCenter();
+                lastLoadCenter = map.getCenter();              
                 
-                loadRegions("TEST@TEST.TEST", map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
+                var currentUserEmail;
+                if(authMod.isUserLoggedIn())
+                    currentUserEmail = authMod.getUserEmail()
+                else
+                    currentUserEmail = "";
+                
+                loadRegions(currentUserEmail, map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
+
                     var resultRegions = results.regions;
                     var numberOfDbRegions = resultRegions.length;
                     var numberOfCurrentRegions = regionList.length;
                     
+
                     // Remove all current regions not in results regions (they've gone too far away)
                     var regionsToRemove = new Array();
                     var found = false;
-                    for (var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; ++iCurrentRegion) {
-                        for(var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; ++iLoadedRegion) {
+                    for (var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
+                        for(var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
                             if(regionList[iCurrentRegion].id === resultRegions[iLoadedRegion].id) {
                                 found = true;   
                             }
@@ -229,15 +270,20 @@
                         found = false;
                     }
                     
+
+
+					
                     var numberOfRegionsToRemove = regionsToRemove.length;
-                    for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; ++iRegionToRemove) {
+                    for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
                         removeCurrentRegion(regionsToRemove[iRegionToRemove]);
                     }
-                    
+					
+
+					
                     // Add all results regions not in current regions (they're new to the loaded area)
-                    for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; ++iLoadedRegion) {
-                        for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; ++iCurrentRegion) {
-                            if(resultRegions[iLoadedRegion].id === regionList[iCurrentRegion].id) {
+                    for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
+                        for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
+                            if(resultRegions[iLoadedRegion] != null && regionList[iCurrentRegion] != null && resultRegions[iLoadedRegion].id === regionList[iCurrentRegion].id) {
                                 found = true;   
                             }
                         }
@@ -247,6 +293,8 @@
                         }
                         found = false;
                     }
+					
+
                     
                 });                
             } 
@@ -273,16 +321,18 @@
                 $("#" + region.id).remove();
                 
             }
-                        
-            // Function which adds all the required stuff for a region:
-            // - The menu item for that region
-            // - The polygon for that region
-            // - Appends the region to the regionList
+            
+            /**
+             * Adds all the required stuff for a single region, including:
+             *  - The menu item for that region (user or global)
+             *  - The polygon for that region
+             *  - The entry for that region in the regionList
+             * @param region ~ The region whose information is to be added
+             */
             function addLoadedRegion(region) {
                 
                 // Append to regionList
                 regionList.push(region);
-                
                 // Add Polygon to region
                 var regionCoords = new Array();
                 
@@ -303,26 +353,45 @@
                 region.isActive = false;
                 
                 // Add the menu item for this region
-                var regionListItem = document.createElement('a');
+				
+				var regionListItem = document.createElement('Li');
+                var regionListItemToggle = document.createElement('a');
                 regionListItem.setAttribute('id', region.id);
-                regionListItem.setAttribute('class', 'list-element');
-                regionListItem.setAttribute('style', 'padding: 2px; margin 2px;');
-                regionListItem.setAttribute('onclick', 'toggleRegion(this)');
-                regionListItem.innerHTML = region.name;
+                regionListItemToggle.setAttribute('class', 'list-element');
+               // regionListItemToggle.setAttribute('style', 'padding: 2px; margin: 2px; float: left;');
+                regionListItemToggle.setAttribute('onclick', 'toggleRegion(this)');
+                regionListItemToggle.innerHTML = region.name;
                 
                 var parent;
                 
                 if(region.type === "universal") {
-                    parent = document.getElementById('globalZonesList');
+					parent = document.getElementById('globalZonesList');
+					regionListItem.appendChild(regionListItemToggle);	
                 } else {
-                    parent = document.getElementById('userZonesList');   
+                    parent = document.getElementById('userZonesList');
+					var deleteButton = document.createElement('input');
+					deleteButton.setAttribute('class','btn btn-danger');
+					deleteButton.value='Delete';
+					deleteButton.setAttribute('type', 'button');
+					deleteButton.setAttribute('onclick','deleteRegion(this)');
+					deleteButton.setAttribute("style", "width: 75%;");
+					regionListItem.appendChild(regionListItemToggle);
+					regionListItem.appendChild(deleteButton);
+
+					
+									
                 }
-                
+                regionListItemToggle.setAttribute("style","width:75%;");
                 parent.appendChild(regionListItem);
             }
             
-            // Helper methods which returns the index of the provided region in the regionList
-            // If the region is not found, then returns -1
+            /**
+             * Helper method which returns the index of the provided region in the
+             * regionList. If the region is not in the regionList, then -1 is
+             * returned.
+             * @param region ~ The region whose index position in regionList is to be
+             * returned
+             */
             function indexOfRegion(region) {
                 
                 var numberOfRegions = regionList.length;
@@ -335,7 +404,12 @@
                 return -1;
             }
             
-            // Toggles a region as being active/inactive based on the element passed
+            /**
+             * Toggles a region between the Active/Inactive state, as well as updates the
+             * relevant elements on the base based on this:
+             *  - Alters the CSS of the elements entry in the side list to indicate its active state
+             *  - Sets its visual polygon to be visible 
+             */
             function toggleRegion(regionElement) {
                 
                 // Change style of element to indicate that it has been toggled
@@ -344,23 +418,77 @@
                 } else {
                     regionElement.setAttribute('class', 'list-element-active');
                 }
-                
-                var regionId = regionElement.id;
+
+                var regionId = regionElement.parentNode.id;
+				
                 var numberOfRegions = regionList.length;
                 
                 for(var iRegion = 0; iRegion < numberOfRegions; ++iRegion) {
                     var currentRegion = regionList[iRegion];
-                    
-                    if(currentRegion.id === regionId) {
+
+					
+                    if(currentRegion.id == regionId) {
+					
                         currentRegion.isActive = !(currentRegion.isActive);
-                        
+					
                         if(currentRegion.isActive)
+						{
+													
                             currentRegion.polygon.setMap(map);
+						}
+
                         else
                             currentRegion.polygon.setMap(null);
+						break;
                     }
                 }
             }
+            
+			
+			/*
+             * Deletes the region using the given delete button element.
+             * @param listElement ~ The deleteButton element of the region to be deleted.
+			 */
+			function deleteRegion(listElement)
+			{
+				//The user pressed no.
+				if(!confirm("Are You Sure?"))
+					return;
+				var listElement = listElement.parentNode;
+			
+				var regionID = listElement.id;
+				
+				
+				httpRequest("POST", "php/deleteRegion.php", ("regionID=" + regionID), 
+				function onSuccess(response) {
+					if (response != null)
+					{
+						//states whether or not the region was deleted.
+						//alert(response);
+					}
+				}, 
+				function onFailure(response)
+				{
+					if (response!=null)
+					{
+						alert("The request failed for the following reasion:\n" + response);
+					}
+					else
+					{
+						alert("The request failed.");
+					}
+				});
+				
+				for (var i = 0; i < regionList.length; i++)
+				{
+					if (regionList[i].id == regionID)
+					{
+						removeCurrentRegion(regionList[i]);
+					}
+				}
+			//	listElement.parentNode.removeChild(listElement);
+
+			}
             
             //this will grab the coordinates from the drawing manager on mouse up.
             function overlayMouseUpListener(overlay) {
@@ -396,7 +524,15 @@
             // Starts drawing on the map
             $("#add-zone").click(function (e) {
                 e.preventDefault();
-                drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+				if (drawingManager.getDrawingMode() == google.maps.drawing.OverlayType.POLYGON)
+				{
+					drawingManager.setDrawingMode(null);
+				}
+				else
+				{
+					drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+				}
+                
             });
 
             // Shows/Hides the side bar
@@ -405,6 +541,7 @@
                 $("#wrapper").toggleClass("toggled");
             });
 
+			setupSearchBox();
             google.maps.event.addDomListener(window, 'load', initialize);
         </script>
         <!-- call to launch authentication script -->

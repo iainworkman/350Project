@@ -98,7 +98,7 @@ try {
     $statement->bindParam(':description', $_POST['description'], PDO::PARAM_STR);
     $statement->bindPAram(':type', $_POST['type'], PDO::PARAM_STR);
     $statement->execute();
-    /**
+    
 	//Insert all of the coordinates into the region_coordinates table.
 	$statement = $db->prepare(
 	"INSERT INTO t_region_coordinates(reg_identifier, reg_latitude, reg_longitude)
@@ -115,7 +115,7 @@ try {
 		$statement->bindParam(':regionLongitude', $coordinate["D"], PDO::PARAM_STR);
 		$statement->execute();
 	}
-	**/
+	
 	echo $regionID;
 
 }
