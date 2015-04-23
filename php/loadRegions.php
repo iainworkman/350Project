@@ -61,7 +61,7 @@ try {
     FROM
     t_region_coordinates
     WHERE
-    reg_identifier = ?"                    
+    reg_identifier = ? ORDER BY reg_order"                    
     );
             
 
