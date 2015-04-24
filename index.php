@@ -398,7 +398,7 @@
 				var regionListItem = document.createElement('div');
                 var regionListItemToggle = document.createElement('a');
                 regionListItem.setAttribute('id', region.id);
-				alert("adding region with id: " + region.id + " and region type: " + region.type);
+				//alert("adding region with id: " + region.id + " and region type: " + region.type);
                 regionListItemToggle.setAttribute('class', 'list-element');
                // regionListItemToggle.setAttribute('style', 'padding: 2px; margin: 2px; float: left;');
                 regionListItemToggle.setAttribute('onclick', 'toggleRegion(this)');
@@ -422,6 +422,7 @@
                 }
 				
 				regionListItem.appendChild(regionListItemToggle);	
+				regionListItemToggle.setAttribute("style","width:60%; position: relative; float: left; margin-bottom: 30px" );
 				if (addDeleteButton)
 				{
 					var deleteButton = document.createElement('input');
@@ -429,11 +430,11 @@
 					deleteButton.value='Delete';
 					deleteButton.setAttribute('type', 'button');
 					deleteButton.setAttribute('onclick','deleteRegionByButton(this)');
-					deleteButton.setAttribute("style", "width: 28%; position: relative; left: 71%; margin-bottom: 30px");
+					deleteButton.setAttribute("style", "width: 28%; position: relative; float: right; margin-bottom: 30px");
 					regionListItem.appendChild(deleteButton);
 				}
 				
-                regionListItemToggle.setAttribute("style","width:60%; position: relative; left: 0%; margin-bottom: 30px" );
+                
                 parent.appendChild(regionListItem);
 
             }
