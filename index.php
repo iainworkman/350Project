@@ -363,14 +363,15 @@
 						editable: true
 						});
 					}
-					else{
+					else
+					{
 						region.polygon = new google.maps.Polygon({
-                    paths: regionCoords,
-                    strokeColor: '#FF0000',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: '#FF0000',
-                    fillOpacity: 0.35
+						paths: regionCoords,
+						strokeColor: '#FF0000',
+						strokeOpacity: 0.8,
+						strokeWeight: 2,
+						fillColor: '#FF0000',
+						fillOpacity: 0.35
 					});
 					}
 				}
@@ -394,9 +395,10 @@
                 
                 // Add the menu item for this region
 				
-				var regionListItem = document.createElement('Li');
+				var regionListItem = document.createElement('div');
                 var regionListItemToggle = document.createElement('a');
                 regionListItem.setAttribute('id', region.id);
+				alert("adding region with id: " + region.id + " and region type: " + region.type);
                 regionListItemToggle.setAttribute('class', 'list-element');
                // regionListItemToggle.setAttribute('style', 'padding: 2px; margin: 2px; float: left;');
                 regionListItemToggle.setAttribute('onclick', 'toggleRegion(this)');
@@ -431,7 +433,7 @@
 					regionListItem.appendChild(deleteButton);
 				}
 				
-                regionListItemToggle.setAttribute("style","width:60%; position: absolute; left: 0%; margin-bottom: 30px" );
+                regionListItemToggle.setAttribute("style","width:60%; position: relative; left: 0%; margin-bottom: 30px" );
                 parent.appendChild(regionListItem);
 
             }
