@@ -570,10 +570,11 @@
                 var regionDescription = document.getElementById('region-description').value
                 document.getElementById('region-description').value = null
                 document.getElementById('region-name').value = null;
-
+				
                 $('#save-region-modal').modal('toggle');
                 saveRegion(regionName, regionDescription);
                 updateRegions();
+				drawingManager.setDrawingMode(null);
             }
 
             // Starts drawing on the map
