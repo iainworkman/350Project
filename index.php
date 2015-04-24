@@ -578,6 +578,7 @@
                 saveRegion(regionName, regionDescription);
                 updateRegions();
 				drawingManager.setDrawingMode(null);
+
             }
 
             // Starts drawing on the map
