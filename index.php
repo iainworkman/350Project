@@ -142,13 +142,9 @@
 			var placeMarkerPairs = [];
 			
 	        // Create the search box and link it to the UI element. 
-			var input = /** @type {HTMLInputElement} */(
-				document.getElementById('searchbox'));
+			var input = (document.getElementById('searchbox'));
  
-			var searchBox = new google.maps.places.SearchBox(
-				/** @type {HTMLInputElement} */(input));
-				
-			
+			var searchBox = new google.maps.places.SearchBox(input);
 			
 			/**
              * A function which initializes the map in the page, and wires up all the required event. 
@@ -161,14 +157,12 @@
 					mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
 
-                map = new google.maps.Map(document.getElementById('map-container'),
-                        mapOptions);
+                map = new google.maps.Map(document.getElementById('map-container'), mapOptions);
 
                 lastLoadCenter = map.getCenter();
 
                 drawingManager = new google.maps.drawing.DrawingManager({
-					drawingMod: null,
-                    //drawingMode: google.maps.drawing.OverlayType.MARKER,
+                    drawingMod: null,
                     drawingControl: false,
                     polygonOptions: {
                         editable: true,
@@ -182,46 +176,35 @@
                 // Handler to detect when the user has dragged the map. Checks if the distance for the drag is sufficient
                 // to trigger a refresh of the data, and if it is performs said data refresh
                 google.maps.event.addListener(map, 'center_changed', checkForUpdate = function (event) {
-
+                    
                     var currentCenter = map.getCenter();
                     var travelledDistanceSinceLastLoad = google.maps.geometry.spherical.computeDistanceBetween(currentCenter, lastLoadCenter);
 
-                    if (travelledDistanceSinceLastLoad < 1000) {
-						
+                    if (travelledDistanceSinceLastLoad < 1000) {						
                         return;
-                    } else {
-					
+                    } else {					
                         updateRegions();
                     }
                 });
+                
 				checkForUpdate(null);
                 
                 //This will grab the coordinates of a region upon creation as well as well as allow grabbing them on edit.
                 google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
 
                     /*Because the typeof method returns object for the overlay type(which is actually our polygon object!), we must
-                     check if it has a function defined called getpath, which is only available(as far as I know) for the polygon object.
-                     */
-                    //alert(typeof event.overlay.setOptions);
-                    if (typeof event.overlay.getPath == 'function')
-                    {
+                     check if it has a function defined called getpath, which is only available(as far as I know) for the polygon object.*/
+                    
+                    if (typeof event.overlay.getPath == 'function') {
                         activePolygon = event.overlay;
+                        
                         overlayMouseUpListener(event.overlay);
                         overlayMouseDownListener(event.overlay);
-                        //console.debug(overlay);
-                        //alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
-						overlayMouseUpListener(event.overlay);
+                        overlayMouseUpListener(event.overlay);
+                        
                         $('#save-region-modal').modal();
 
-                    }
-                    else
-                    {
-                        //alert("This was a position click");
-                    }
-					
-
-				
-				
+                    } 
                 });                
             }
             
@@ -277,9 +260,7 @@
                         for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
                             removeCurrentRegion(regionsToRemove[iRegionToRemove]);
                         }
-
-
-
+                        
                         // Add all results regions not in current regions (they're new to the loaded area)
                         for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
                             found = false;
@@ -346,45 +327,39 @@
                 }
 				
 				
-                if (region.type == 'universal')
-				{
+                if (region.type == 'universal') {
 					
-					
-					
-					if (authMod.getUserEmail() == 'rajlaforge@gmail.com')
-					{
+                    // If we match an admin email address, make this a global region
+					if (authMod.getUserEmail() == 'rajlaforge@gmail.com') {
 						region.polygon = new google.maps.Polygon({
-						paths: regionCoords,
-						strokeColor: '#FF0000',
-						strokeOpacity: 0.8,
-						strokeWeight: 2,
-						fillColor: '#FF0000',
-						fillOpacity: 0.35,
-						editable: true
+                            paths: regionCoords,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.35,
+                            editable: true
 						});
+					} else {
+                        region.polygon = new google.maps.Polygon({
+                            paths: regionCoords,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.35
+                        });
 					}
-					else
-					{
-						region.polygon = new google.maps.Polygon({
-						paths: regionCoords,
-						strokeColor: '#FF0000',
-						strokeOpacity: 0.8,
-						strokeWeight: 2,
-						fillColor: '#FF0000',
-						fillOpacity: 0.35
-					});
-					}
-				}
-				else{
-					region.polygon = new google.maps.Polygon({
-                    paths: regionCoords,
-                    strokeColor: 'green',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: 'black',
-					editable: true,
-                    fillOpacity: 0.35
-					});
+				} else {
+                    region.polygon = new google.maps.Polygon({
+                        paths: regionCoords,
+                        strokeColor: 'green',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: 'black',
+                        editable: true,
+                        fillOpacity: 0.35
+                    });
 				}
 				
 				overlayMouseUpListener(region.polygon);
@@ -411,20 +386,19 @@
 				var addDeleteButton = false;
                 if(region.type === "universal") {
 					parent = document.getElementById('globalZonesList');
-					if ( authMod.getUserEmail() == 'rajlaforge@gmail.com')
-					{
-						addDeleteButton = true;
-					}
+					
+                    // Only allow deletion if the user is an admin
+                    if ( authMod.getUserEmail() == 'rajlaforge@gmail.com') {
+                        addDeleteButton = true;
+                    }
                 } else {
 					parent = document.getElementById('userZonesList');
-					addDeleteButton = true;
-								
+					addDeleteButton = true;								
                 }
 				
 				regionListItem.appendChild(regionListItemToggle);	
 				regionListItemToggle.setAttribute("style","width:60%; position: relative; float: left; margin-bottom: 30px" );
-				if (addDeleteButton)
-				{
+				if (addDeleteButton) {
 					var deleteButton = document.createElement('input');
 					deleteButton.setAttribute('class','btn btn-danger');
 					deleteButton.value='Delete';
@@ -434,7 +408,6 @@
 					regionListItem.appendChild(deleteButton);
 				}
 				
-                
                 parent.appendChild(regionListItem);
 
             }
@@ -486,14 +459,11 @@
 						
                         currentRegion.isActive = !(currentRegion.isActive);
 					
-                        if(currentRegion.isActive)
-						{
-													
+                        if(currentRegion.isActive) {													
                             currentRegion.polygon.setMap(map);
-						}
-
-                        else
+						} else {
                             currentRegion.polygon.setMap(null);
+                        }
 						break;
                     }
                 }
@@ -504,14 +474,14 @@
              * Deletes the region using the given delete button element.
              * @param listElement ~ The deleteButton element of the region to be deleted.
 			 */
-			function deleteRegionByButton(listElement)
-			{
-				//The user pressed no.
+			function deleteRegionByButton(listElement) {
+				
+                //The user pressed no.
 				if(!confirm("Are You Sure?"))
 					return;
-				var listElement = listElement.parentNode;
-			
-				var regionID = listElement.id;
+				
+                var listElement = listElement.parentNode;
+                var regionID = listElement.id;
 				
 				deleteRegion(regionID, true);
 				
@@ -523,11 +493,9 @@
                 google.maps.event.addListener(overlay, "mouseup", function (event) {
                     activePolygon = overlay;
                     console.debug(overlay);
-					//Do this asynchronously after a certain amount of time so that the overlay object has its points updated before this is done.
+					
+                    //Do this asynchronously after a certain amount of time so that the overlay object has its points updated before this is done.
 					setTimeout(function() {editRegionWithPolygon(overlay); $('img[src$="undo_poly.png"]').hide();}, 100);
-					//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
-					
-					
                 });
             }
 
@@ -540,35 +508,10 @@
                     console.debug(overlay);//alert("This is in the overlay mouse down listener; " + overlay.getPath().getArray());
 					editRegionWithPolygon(overlay);
                 });
-
             }
 
-			/**Display the save modal, but with additional information.
-			@param polygon ~ The polygon that was clicked on.
-			**/
-			function editPolygonDisplay(polygon)
-			{
-				/** BROKEN
-				$('#save-region-modal').modal();
-				var region;
-				for (var i = 0; i < regionList.length; i++)
-				{
-					if (regionList[i] == polygon)
-					{
-						region = regionList[i];
-					}
-				}
-				if (region != null)
-				{
-					document.getElementById('region-description').value = region.name;
-					document.getElementById('region-name').value = region.description;
-				}**/
-
-				
-			}
-            //called by the save button in the modal. Simply acts as a gateway to allow saving after the button press.
-            function saveRegionGateway()
-            {
+			//called by the save button in the modal. Simply acts as a gateway to allow saving after the button press.
+            function saveRegionGateway() {
                 var regionName = document.getElementById('region-name').value;
                 var regionDescription = document.getElementById('region-description').value
                 document.getElementById('region-description').value = null
@@ -578,21 +521,16 @@
                 saveRegion(regionName, regionDescription);
                 updateRegions();
 				drawingManager.setDrawingMode(null);
-
             }
 
             // Starts drawing on the map
             $("#add-zone").click(function (e) {
                 e.preventDefault();
-				if (drawingManager.getDrawingMode() == google.maps.drawing.OverlayType.POLYGON)
-				{
+				if (drawingManager.getDrawingMode() == google.maps.drawing.OverlayType.POLYGON) {
 					drawingManager.setDrawingMode(null);
-				}
-				else
-				{
+				} else {
 					drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
-				}
-                
+				}                
             });
 
             // Shows/Hides the side bar
