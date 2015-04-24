@@ -40,9 +40,9 @@ try {
         SELECT reg_identifier 
         FROM t_region_coordinates 
         WHERE 
-            ABS(reg_latitude - ?) < 0.2
+            ABS(reg_latitude - ?) < 0.5
             AND
-            ABS(reg_longitude - ?) < 0.2
+            ABS(reg_longitude - ?) < 0.5
     )
     "
     );
@@ -61,7 +61,7 @@ try {
     FROM
     t_region_coordinates
     WHERE
-    reg_identifier = ?"                    
+    reg_identifier = ? ORDER BY reg_order"                    
     );
             
 

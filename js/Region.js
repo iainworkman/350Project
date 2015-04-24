@@ -65,7 +65,7 @@ function Region (polygon, owner, type)
 
 		polygon.setOptions({
 			editable: true,
-			fillColor: 'BLUE',
+			fillColor: 'BLACK',
 			draggable: true,
 			clickable: true,
 			strokeColor: 'GREEN'

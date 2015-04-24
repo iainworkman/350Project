@@ -34,11 +34,11 @@
                     </li>
                     <li>
                         My Zones
-                        <ul id="userZonesList"></ul>
+                        <div id="userZonesList"></div>
                     </li>
                     <li>
                         Global Zones
-                        <ul id="globalZonesList"></ul>
+                        <div id="globalZonesList"></div>
                     </li>
                 </ul>
             </div> <!-- /#sidebar-wrapper -->
@@ -114,6 +114,8 @@
         <!-- Authorization code -->
         <script src="js/auth.js" type="text/javascript"></script>
 		
+		<!--The placeMarkerPair object -->
+		<script type="text/javascript" src="js/PlaceMarkerPair.js"></script>
         <script>
             /// The current polygon being added as a zone
             var activePolygon;
@@ -127,7 +129,7 @@
             var handleGoogleClientLoad = authMod.handleClientLoad;            
             /// The LatLng of the center of the map the last time that the data was refreshed.
             var lastLoadCenter = null;
-            /// Whether the page is currently loading regions - the page stops loading regions when zoomed out too much
+            /// Whether the page is currently loading regions - the page waits for the current request to be returned before it tries another.
             var doLoad = true;
             /// A collection of all the regions loaded from the database.
             var regionList = new Array();
@@ -136,32 +138,31 @@
 			var places = [];
 			//Holder for places of interest that are looked up in a search.
 			var markers = [];
+			//Keeps the current markers on the map and the places bound together.
+			var placeMarkerPairs = [];
+			
 	        // Create the search box and link it to the UI element. 
-			var input = /** @type {HTMLInputElement} */(
-				document.getElementById('searchbox'));
+			var input = (document.getElementById('searchbox'));
  
-			var searchBox = new google.maps.places.SearchBox(
-				/** @type {HTMLInputElement} */(input));
-				
+			var searchBox = new google.maps.places.SearchBox(input);
 			
 			/**
              * A function which initializes the map in the page, and wires up all the required event. 
-             * For now this ccenters the map on Saskatoon - in order to avoid requesting Geolocation positions. 
+             * For now this centers the map on Saskatoon - in order to avoid requesting Geolocation positions. 
              */
             function initialize() {
                 var mapOptions = {
-                    zoom: 14,
+                    zoom: 10,
                     center: new google.maps.LatLng(52.1153705, -106.6166251),
 					mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
 
-                map = new google.maps.Map(document.getElementById('map-container'),
-                        mapOptions);
+                map = new google.maps.Map(document.getElementById('map-container'), mapOptions);
 
                 lastLoadCenter = map.getCenter();
 
                 drawingManager = new google.maps.drawing.DrawingManager({
-                    drawingMode: google.maps.drawing.OverlayType.MARKER,
+                    drawingMod: null,
                     drawingControl: false,
                     polygonOptions: {
                         editable: true,
@@ -175,58 +176,36 @@
                 // Handler to detect when the user has dragged the map. Checks if the distance for the drag is sufficient
                 // to trigger a refresh of the data, and if it is performs said data refresh
                 google.maps.event.addListener(map, 'center_changed', checkForUpdate = function (event) {
-
+                    
                     var currentCenter = map.getCenter();
                     var travelledDistanceSinceLastLoad = google.maps.geometry.spherical.computeDistanceBetween(currentCenter, lastLoadCenter);
 
-                    if (!lastLoadCenter == null && travelledDistanceSinceLastLoad < 10000) {
-						
+                    if (travelledDistanceSinceLastLoad < 1000) {						
                         return;
-                    } else {
-					
+                    } else {					
                         updateRegions();
                     }
                 });
+                
 				checkForUpdate(null);
                 
-                // Handler to detect when the user has zoomed in or out of the map. When the user zooms out, at a certain level of zoom we
-                // stop loading regions and clear the list. When the user zooms back in we restart loading.
-                google.maps.event.addListener(map, 'zoom_changed', function (event) {
-                    if (map.getZoom() < 10 && doLoad === true) {
-                        doLoad = false;
-                        
-                    } else if (map.getZoom() >= 10 && doLoad === false) {
-                        doLoad = true;
-                        
-                    }
-
-                });
-
                 //This will grab the coordinates of a region upon creation as well as well as allow grabbing them on edit.
                 google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
 
                     /*Because the typeof method returns object for the overlay type(which is actually our polygon object!), we must
-                     check if it has a function defined called getpath, which is only available(as far as I know) for the polygon object.
-                     */
-                    //alert(typeof event.overlay.setOptions);
-                    if (typeof event.overlay.getPath == 'function')
-                    {
+                     check if it has a function defined called getpath, which is only available(as far as I know) for the polygon object.*/
+                    
+                    if (typeof event.overlay.getPath == 'function') {
                         activePolygon = event.overlay;
+                        
                         overlayMouseUpListener(event.overlay);
                         overlayMouseDownListener(event.overlay);
-                        //console.debug(overlay);
-                        //alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+                        overlayMouseUpListener(event.overlay);
+                        
                         $('#save-region-modal').modal();
 
-                    }
-                    else
-                    {
-                        //alert("This was a position click");
-                    }
-
-                });
-
-                
+                    } 
+                });                
             }
             
             
@@ -242,11 +221,12 @@
                 lastLoadCenter = map.getCenter();              
                 
                 var currentUserEmail;
-                if(authMod.isUserLoggedIn())
-                    currentUserEmail = authMod.getUserEmail()
+                if(authMod.isUserLoggedIn() != 'rajlaforge@gmail.com')
+                    currentUserEmail = authMod.getUserEmail();
                 else
                     currentUserEmail = "";
                 
+                doLoad = false;
                 loadRegions(currentUserEmail, map.getCenter().lat(), map.getCenter().lng(), function onLoad(results) {
 
                     var resultRegions = results.regions;
@@ -254,57 +234,64 @@
                     var numberOfCurrentRegions = regionList.length;
                     
 
-                    // Remove all current regions not in results regions (they've gone too far away)
-                    var regionsToRemove = new Array();
-                    var found = false;
-                    for (var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
-                        for(var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
-                            if(regionList[iCurrentRegion].id === resultRegions[iLoadedRegion].id) {
-                                found = true;   
+                    if(regionList.length == 0) {
+                        // Just add the regions
+                        for(var iCurrentRegion = 0; iCurrentRegion < resultRegions.length; iCurrentRegion++) {
+                            addLoadedRegion(resultRegions[iCurrentRegion]);
+                        }
+                    } else {                        
+                        // Remove all current regions not in results regions (they've gone too far away)
+                        var regionsToRemove = new Array();
+                        var found = false;
+                        for (var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
+                            for(var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions && !found; iLoadedRegion++) {
+                                if(regionList[iCurrentRegion].id == resultRegions[iLoadedRegion].id) {
+                                    found = true;   
+                                }
                             }
+
+                            if (!found) {
+                                regionsToRemove.push(regionList[iCurrentRegion]);   
+                            }
+                            found = false;
+                        }
+
+                        var numberOfRegionsToRemove = regionsToRemove.length;
+                        for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
+                            removeCurrentRegion(regionsToRemove[iRegionToRemove]);
                         }
                         
-                        if (!found) {
-                            regionsToRemove.push(regionList[iCurrentRegion]);   
-                        }
-                        found = false;
-                    }
-                    
+                        // Add all results regions not in current regions (they're new to the loaded area)
+                        for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
+                            found = false;
 
+                            for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions && !found; iCurrentRegion++) {
+                                if(resultRegions[iLoadedRegion] != null && regionList[iCurrentRegion] != null && resultRegions[iLoadedRegion].id == regionList[iCurrentRegion].id) {
+                                    found = true;   
+                                }
+                            }
 
-					
-                    var numberOfRegionsToRemove = regionsToRemove.length;
-                    for (var iRegionToRemove = 0; iRegionToRemove < numberOfRegionsToRemove; iRegionToRemove++) {
-                        removeCurrentRegion(regionsToRemove[iRegionToRemove]);
-                    }
-					
-
-					
-                    // Add all results regions not in current regions (they're new to the loaded area)
-                    for (var iLoadedRegion = 0; iLoadedRegion < numberOfDbRegions; iLoadedRegion++) {
-                        for(var iCurrentRegion = 0; iCurrentRegion < numberOfCurrentRegions; iCurrentRegion++) {
-                            if(resultRegions[iLoadedRegion] != null && regionList[iCurrentRegion] != null && resultRegions[iLoadedRegion].id === regionList[iCurrentRegion].id) {
-                                found = true;   
+                            if(!found) {
+                                addLoadedRegion(resultRegions[iLoadedRegion]);   
                             }
                         }
-                        
-                        if(!found) {
-                            addLoadedRegion(resultRegions[iLoadedRegion]);   
-                        }
-                        found = false;
                     }
-					
+                    doLoad = true;
 
-                    
-                });                
+                }); 
+
+
             } 
 
-            // Function which removes all the required stuff for a region:
-            // - If is active, then removes its polygon from the maps
-            // - removes it from the regionList
-            // - removes the menu item for that region
+            /** Function which removes all the required stuff for a region:
+              If is active, then removes its polygon from the maps
+              removes it from the regionList
+              removes the menu item for that region
+			  @param region ~ The region to remove from the map and regionList.
+			  **/
+			
             function removeCurrentRegion(region) {
-                
+
                 // remove poly from map if it is active
                 if(region.isActive) {
                     region.polygon.setMap(null);   
@@ -314,12 +301,11 @@
                 var regionIndex = indexOfRegion(region);
                 
                 if(regionIndex > -1) {
-                    regionList.splice(regionIndex);   
+                    regionList.splice(regionIndex,1);   
                 }
                 
                 // Remove the menu item
                 $("#" + region.id).remove();
-                
             }
             
             /**
@@ -339,24 +325,55 @@
                 for(var iRegionCoord = 0; iRegionCoord < region.coordinates.length; ++iRegionCoord) {
                     regionCoords.push(new google.maps.LatLng(region.coordinates[iRegionCoord].latitude, region.coordinates[iRegionCoord].longitude));
                 }
-                
-                region.polygon = new google.maps.Polygon({
-                    paths: regionCoords,
-                    strokeColor: '#FF0000',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: '#FF0000',
-                    fillOpacity: 0.35
-                });
+				
+				
+                if (region.type == 'universal') {
+					
+                    // If we match an admin email address, make this a global region
+					if (authMod.getUserEmail() == 'rajlaforge@gmail.com') {
+						region.polygon = new google.maps.Polygon({
+                            paths: regionCoords,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.35,
+                            editable: true
+						});
+					} else {
+                        region.polygon = new google.maps.Polygon({
+                            paths: regionCoords,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.35
+                        });
+					}
+				} else {
+                    region.polygon = new google.maps.Polygon({
+                        paths: regionCoords,
+                        strokeColor: 'green',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: 'black',
+                        editable: true,
+                        fillOpacity: 0.35
+                    });
+				}
+				
+				overlayMouseUpListener(region.polygon);
+				overlayMouseDownListener(region.polygon);
                 
                 // Ensures that the isActive data exists for the region, and that it is false
                 region.isActive = false;
                 
                 // Add the menu item for this region
 				
-				var regionListItem = document.createElement('Li');
+				var regionListItem = document.createElement('div');
                 var regionListItemToggle = document.createElement('a');
                 regionListItem.setAttribute('id', region.id);
+				//alert("adding region with id: " + region.id + " and region type: " + region.type);
                 regionListItemToggle.setAttribute('class', 'list-element');
                // regionListItemToggle.setAttribute('style', 'padding: 2px; margin: 2px; float: left;');
                 regionListItemToggle.setAttribute('onclick', 'toggleRegion(this)');
@@ -364,25 +381,38 @@
                 
                 var parent;
                 
+				//Note: We only wish to include delete buttons on user regions, or global regions if the admin is logged in.
+				
+				var addDeleteButton = false;
                 if(region.type === "universal") {
 					parent = document.getElementById('globalZonesList');
-					regionListItem.appendChild(regionListItemToggle);	
+					
+                    // Only allow deletion if the user is an admin
+                    if ( authMod.getUserEmail() == 'rajlaforge@gmail.com') {
+                        addDeleteButton = true;
+                    }
                 } else {
-                    parent = document.getElementById('userZonesList');
+					parent = document.getElementById('userZonesList');
+					addDeleteButton = true;								
+                }
+				
+				regionListItem.appendChild(regionListItemToggle);	
+				regionListItemToggle.setAttribute("style","width:70%; position: relative; float: left; margin-bottom: 10px; margin-left:3px");
+				if (addDeleteButton) {
 					var deleteButton = document.createElement('input');
 					deleteButton.setAttribute('class','btn btn-danger');
 					deleteButton.value='Delete';
 					deleteButton.setAttribute('type', 'button');
-					deleteButton.setAttribute('onclick','deleteRegion(this)');
-					deleteButton.setAttribute("style", "width: 75%;");
-					regionListItem.appendChild(regionListItemToggle);
+					deleteButton.setAttribute('onclick','deleteRegionByButton(this)');
+					deleteButton.setAttribute("style", "width: 20%; position: relative; float: right; margin-bottom: 10px; margin-right:10px;");
+                    regionListItemToggle.setAttribute("style","width:70%; position: relative; float: left; margin-bottom: 10px; margin-left:3px");
 					regionListItem.appendChild(deleteButton);
-
-					
-									
+				} else {
+                    regionListItemToggle.setAttribute("style","width:95%; position: relative; float: left; margin-bottom: 10px; margin-left:3px");
                 }
-                regionListItemToggle.setAttribute("style","width:75%;");
+				
                 parent.appendChild(regionListItem);
+
             }
             
             /**
@@ -408,7 +438,8 @@
              * Toggles a region between the Active/Inactive state, as well as updates the
              * relevant elements on the base based on this:
              *  - Alters the CSS of the elements entry in the side list to indicate its active state
-             *  - Sets its visual polygon to be visible 
+             *  - Sets its visual polygon to be visible
+			 * @param regionElement ~ the regionElement(anchor element that corresponds to a region) that is to be toggled. 
              */
             function toggleRegion(regionElement) {
                 
@@ -428,17 +459,14 @@
 
 					
                     if(currentRegion.id == regionId) {
-					
+						
                         currentRegion.isActive = !(currentRegion.isActive);
 					
-                        if(currentRegion.isActive)
-						{
-													
+                        if(currentRegion.isActive) {													
                             currentRegion.polygon.setMap(map);
-						}
-
-                        else
+						} else {
                             currentRegion.polygon.setMap(null);
+                        }
 						break;
                     }
                 }
@@ -449,52 +477,28 @@
              * Deletes the region using the given delete button element.
              * @param listElement ~ The deleteButton element of the region to be deleted.
 			 */
-			function deleteRegion(listElement)
-			{
-				//The user pressed no.
+			function deleteRegionByButton(listElement) {
+				
+                //The user pressed no.
 				if(!confirm("Are You Sure?"))
 					return;
-				var listElement = listElement.parentNode;
-			
-				var regionID = listElement.id;
 				
+                var listElement = listElement.parentNode;
+                var regionID = listElement.id;
 				
-				httpRequest("POST", "php/deleteRegion.php", ("regionID=" + regionID), 
-				function onSuccess(response) {
-					if (response != null)
-					{
-						//states whether or not the region was deleted.
-						//alert(response);
-					}
-				}, 
-				function onFailure(response)
-				{
-					if (response!=null)
-					{
-						alert("The request failed for the following reasion:\n" + response);
-					}
-					else
-					{
-						alert("The request failed.");
-					}
-				});
+				deleteRegion(regionID, true);
 				
-				for (var i = 0; i < regionList.length; i++)
-				{
-					if (regionList[i].id == regionID)
-					{
-						removeCurrentRegion(regionList[i]);
-					}
-				}
-			//	listElement.parentNode.removeChild(listElement);
-
 			}
             
+
             //this will grab the coordinates from the drawing manager on mouse up.
             function overlayMouseUpListener(overlay) {
                 google.maps.event.addListener(overlay, "mouseup", function (event) {
                     activePolygon = overlay;
-                    console.debug(overlay);//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
+                    console.debug(overlay);
+					
+                    //Do this asynchronously after a certain amount of time so that the overlay object has its points updated before this is done.
+					setTimeout(function() {editRegionWithPolygon(overlay); $('img[src$="undo_poly.png"]').hide();}, 100);
                 });
             }
 
@@ -505,34 +509,31 @@
                 google.maps.event.addListener(overlay, "mousedown", function (event) {
                     activePolygon = overlay;
                     console.debug(overlay);//alert("This is in the overlay mouse down listener; " + overlay.getPath().getArray());
+					editRegionWithPolygon(overlay);
                 });
             }
 
-            //called by the save button in the modal. Simply acts as a gateway to allow saving after the button press.
-            function saveRegionGateway()
-            {
+			//called by the save button in the modal. Simply acts as a gateway to allow saving after the button press.
+            function saveRegionGateway() {
                 var regionName = document.getElementById('region-name').value;
                 var regionDescription = document.getElementById('region-description').value
                 document.getElementById('region-description').value = null
                 document.getElementById('region-name').value = null;
-
+				
                 $('#save-region-modal').modal('toggle');
                 saveRegion(regionName, regionDescription);
                 updateRegions();
+				drawingManager.setDrawingMode(null);
             }
 
             // Starts drawing on the map
             $("#add-zone").click(function (e) {
                 e.preventDefault();
-				if (drawingManager.getDrawingMode() == google.maps.drawing.OverlayType.POLYGON)
-				{
+				if (drawingManager.getDrawingMode() == google.maps.drawing.OverlayType.POLYGON) {
 					drawingManager.setDrawingMode(null);
-				}
-				else
-				{
+				} else {
 					drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
-				}
-                
+				}                
             });
 
             // Shows/Hides the side bar
@@ -543,6 +544,8 @@
 
 			setupSearchBox();
             google.maps.event.addDomListener(window, 'load', initialize);
+			
+		
         </script>
         <!-- call to launch authentication script -->
         <script src="https://apis.google.com/js/client.js?onload=handleGoogleClientLoad"></script>
