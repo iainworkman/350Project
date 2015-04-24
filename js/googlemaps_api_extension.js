@@ -166,6 +166,7 @@ else
 			setTimeout(function() {
 			toggleRegion(document.getElementById(region.getRegionID()).childNodes[0]);}, 100);
 			
+			
 		});
 }
 
@@ -512,9 +513,9 @@ function setupSearchBox()
 	  }
 	  
 	  //set up a temporary polygon to prevent the blinking appearance.
-		var tempPolygon = new google.maps.polygon(
+		/**var tempPolygon = new google.maps.Polygon(
 		{
-			paths: regionToEdit.polygon.paths,
+					paths: regionToEdit.polygon.paths,
                     strokeColor: regionToEdit.polygon.strokeColor,
                     strokeOpacity: regionToEdit.polygon.strokeOpacity,
                     strokeWeight: regionToEdit.polygon.strokeWeight,
@@ -523,7 +524,7 @@ function setupSearchBox()
                     fillOpacity: regionToEdit.polygon.fillOpacity
 		});
 		tempPolygon.setMap(map);
-		setTimeout(function(){tempPolygon.setMap(null)},5000);
+		setTimeout(function(){tempPolygon.setMap(null)},5000);**/
 	  activePolygon = regionToEdit.polygon;
 	  deleteRegion(regionToEdit.id, false);
 	  saveRegion(regionToEdit.name, regionToEdit.description);
