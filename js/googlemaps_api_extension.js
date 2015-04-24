@@ -65,8 +65,8 @@ function loadRegions(userId, latitude, longitude, onLoad) {
  * @param onSave ~ A function to call when the region is successfully saved. This can be null, but if it is not,
 					it should be able to accept a jsonResponse.
 */
-function saveRegionToDB(userId, region, onSave)
-{
+function saveRegionToDB(userId, region, onSave) {
+    
 	//grab the actual array of the region path.
 	var path = region.getPolygonPath().getArray();
 	
@@ -85,23 +85,17 @@ function saveRegionToDB(userId, region, onSave)
 	httpRequest("POST","php/saveRegion.php",params,
 	function onSuccess(response) {
 		var jsonResponse = JSON.parse(response);
-		if (jsonResponse == null)
-		{
+		if (jsonResponse == null) {
 			alert("no response from json");
-		}
-		else if (jsonResponse.error != null)
-		{
+		} else if (jsonResponse.error != null) {
 			alert("Failed to save the region to the database with the following jsonResponse " + jsonResponse.error);
-		}
-		else
-		{
+		} else {
 			onSave(jsonResponse);
 		}
 	},
 		function onFailure() {
 			alert("Failed to save the region to the database. The HTTPRequest failed.");
-		}
-		
+		}		
 	);
 	
 }
@@ -111,14 +105,10 @@ function saveRegionToDB(userId, region, onSave)
 
 /*This removed theactivePolygon from the map.
 */
-function removePolygon()
-{
-	if (typeof activePolygon != 'undefined')
-	{
+function removePolygon() {
+	if (typeof activePolygon != 'undefined') {
 		activePolygon.setMap(null);
-	}
-	else
-	{
+	} else {
 		alert("Active Polygon is null");
 	}
 }
@@ -131,55 +121,43 @@ function removePolygon()
  * @Param - regionDescription ~ the region description.
  *
 */
-function saveRegion(regionName,regionDescription)
-{
-		
-		
-        var currentUser = authMod.getUserEmail();
-		var type;
-if (authMod.getUserEmail() != 'rajlaforge@gmail.com')
-{
-	
-	type = 'personal';
-}	
-else
-{
-	
-	type = 'universal';
-}
-		//the active region is currently set in all of the listeners.
-		var region = new Region(activePolygon, currentUser, type);
-		region.setName(regionName);
-		region.setDescription(regionDescription);
-		
-		
-		//Add the region object to the global list of region objects.
-		
-		//Send the region object information off to the server to save to the database.
-		saveRegionToDB(currentUser,region, function onSave(results){
-
-			//This sets the region id of the newly saved region. The response from saveRegion.php is the new region id.
-			region.setID(results);
-			
-			doLoad = true;
-			updateRegions();
-			setTimeout(function() {
-			toggleRegion(document.getElementById(region.getRegionID()).childNodes[0]); region.getPolygon().setMap(null)}, 500);
-			
-			
-		});
+function saveRegion(regionName,regionDescription) {
+    var currentUser = authMod.getUserEmail();
+    var type;
+    if (authMod.getUserEmail() != 'rajlaforge@gmail.com') {
+        type = 'personal';
+    } else {
+        type = 'universal';
+    }
+    
+    //the active region is currently set in all of the listeners.
+    var region = new Region(activePolygon, currentUser, type);
+    region.setName(regionName);
+    region.setDescription(regionDescription);
+    
+    //Add the region object to the global list of region objects.
+    
+    //Send the region object information off to the server to save to the database.
+    saveRegionToDB(currentUser,region, function onSave(results){
+        
+        //This sets the region id of the newly saved region. The response from saveRegion.php is the new region id.
+        region.setID(results);
+        
+        doLoad = true;
+        updateRegions();
+        
+        setTimeout(function() {
+            toggleRegion(document.getElementById(region.getRegionID()).childNodes[0]); region.getPolygon().setMap(null)}, 500);
+    });
 }
 
 
 /**Initiates the search. This is performed when the search button is pressed, or the enter key is pressed while the searchbox has focus.
 This is the documentation for a places search. 
 //https://developers.google.com/maps/documentation/javascript/places#place_details**/
-function fireSearch()
-{
-	
-	
-	
-	var text = document.getElementById('searchbox').value;
+function fireSearch() {
+    
+    var text = document.getElementById('searchbox').value;
 	var request = {
         location: map.getCenter(),
         radius: '500',
@@ -187,261 +165,212 @@ function fireSearch()
 	};
 	
 
-	
-	
-	  var service = new google.maps.places.PlacesService(map);
-		service.textSearch(request, callback);
-	
-}/**Handles asking the places api for a search**/
-	function callback(results, status)
-	{
-			 places = [];
-	 clearMarkers();
-		placeMarkerPairs = [];
-		 //If the places were retreived. 
-		  if (status == google.maps.places.PlacesServiceStatus.OK) 
-		  {
-			for (var i = 0; i < results.length; i++) 
-			{
-				places[i] = results[i];
-				var image = {
-					url: places[i].icon,
-					size: new google.maps.Size(71, 71),
-					origin: new google.maps.Point(0, 0),
-					anchor: new google.maps.Point(17, 34),
-					scaledSize: new google.maps.Size(25, 25)
-				};
-				var marker = new google.maps.Marker({
-					icon: image,
-					title: "Name: " + places[i].name + "\nAddress: " + places[i].formatted_address,
-					position: places[i].geometry.location
-					
-				});
-				markers[i] = marker;
-				placeMarkerPairs.push(new PlaceMarkerPair(places[i], marker));
-			}
-			 if (isRegionSelected())
-			 {
-				 filterSearchResults(markers);
-			 }
-			 else
-			 {
+	var service = new google.maps.places.PlacesService(map);
+    service.textSearch(request, callback);
 
-				 setMarkers(markers);
-				 centerMap(markers);
-				 setPlaceMarkerDetails();
+}
 
-			 }
-		  }
-		 
-		  else if (status == google.maps.places.PlacesServiceStatus.ERROR)
-		  {
-			  alert("There was a problem connecting to google services.");
-		  }
-		  else if (status == google.maps.places.PlacesServiceStatus.INVALID_REQUEST)
-		  {
-			  alert("For some reason the request was not valid.");
-		  }
-		  else if (status == google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT)
-		  {
-			  alert("The search results are too big, please be more specific about the search.");
-		  }
-		  else if (status == google.maps.places.PlacesServiceStatus.REQUEST_DENIES)
-		  {
-			  alert("This site was banned from using google placesService :(");
-		  }
-		  else if (status == google.maps.places.PlacesServiceStatus.UNKOWN_ERROR)
-		  {
-			  alert("something went wrong, please try again.");
-		  }
-		  else if (status == google.maps.places.PlacesServiceStatus.ZERO_RESULTS)
-		  {
-			  alert("The search query returned 0 results for that search term.");
-		  }
-	};
+function callback(results, status) {
+    
+    places = [];
+    clearMarkers();
+    placeMarkerPairs = [];
+    
+    //If the places were retreived. 
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+        
+        for (var i = 0; i < results.length; i++) {
+            
+            places[i] = results[i];
+            var image = {
+                url: places[i].icon,
+                size: new google.maps.Size(71, 71),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(17, 34),
+                scaledSize: new google.maps.Size(25, 25)
+            };
+            
+            var marker = new google.maps.Marker({
+                icon: image,
+                title: "Name: " + places[i].name + "\nAddress: " + places[i].formatted_address,
+                position: places[i].geometry.location
+            });
+            
+            markers[i] = marker;
+            placeMarkerPairs.push(new PlaceMarkerPair(places[i], marker));
+        }
+        
+        if (isRegionSelected()) {
+            filterSearchResults(markers);
+        } else {
+            
+            setMarkers(markers);
+            centerMap(markers);
+            setPlaceMarkerDetails();
+        }
+    }
+    
+    else if (status == google.maps.places.PlacesServiceStatus.ERROR) {
+        alert("There was a problem connecting to google services.");
+    } else if (status == google.maps.places.PlacesServiceStatus.INVALID_REQUEST) {
+        alert("For some reason the request was not valid.");
+    } else if (status == google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
+        alert("The search results are too big, please be more specific about the search.");
+    } else if (status == google.maps.places.PlacesServiceStatus.REQUEST_DENIES) {
+        alert("This site was banned from using google placesService :(");
+    } else if (status == google.maps.places.PlacesServiceStatus.UNKOWN_ERROR) {
+        alert("something went wrong, please try again.");
+    } else if (status == google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+        alert("The search query returned 0 results for that search term.");
+    }
+};
 	
 	/**@return: true if a region is selected, false if not.**/
-function isRegionSelected()
-{
+function isRegionSelected() {
+    
 	//Determine if a region is selected. IF none are selected, the search will return false.
 	var regionSelected = false;
-	for (var i = 0; i < regionList.length; i++)
-	{
-		if (regionList[i].isActive)
-		{
-			return true;
-		}
-	}
+	for (var i = 0; i < regionList.length; i++) {
+        
+        if (regionList[i].isActive) {
+            return true;
+        }
+    }
 	return false;
 }
 
 /**Centers the map so that it is at a zoom in which all of ther markesr can be seen. (the map will zoom to include all of the markers.)
 * @Param centerMarkers ~ The markers to center the map around. **/
-function centerMap(centerMarkers)
-{
-	if (centerMarkers.length >0)
-	{
-			 var bounds = new google.maps.LatLngBounds();
-		for (var i = 0; i < centerMarkers.length; i++)
-		{
-			bounds.extend(centerMarkers[i].position);
-		}
+function centerMap(centerMarkers) {
+    
+	if (centerMarkers.length >0) {
+        var bounds = new google.maps.LatLngBounds();
+        
+        for (var i = 0; i < centerMarkers.length; i++) {
+            bounds.extend(centerMarkers[i].position);
+        }
 	 
 		map.fitBounds(bounds);	 
 	}
-
 }
 
 /**filters the given markers to be a list of only markers that are actually located in a selected region.
 @Param markers ~ the markers to search for in each selected region.
 @PostCon ~ markers contains only markers that are located within any of the selected regions.**/
-function filterSearchResults(markers)
-{
-		//If a region is selected, go through the list of markers and remove any that are not in the selected regions.
-		  	  //Check to see if the marker is contained within each of the polygons here.
-	var positionWithinBounds = false;
+function filterSearchResults(markers) {
+    
+    //If a region is selected, go through the list of markers and remove any that are not in the selected regions.
+    //Check to see if the marker is contained within each of the polygons here.
+    
+    var positionWithinBounds = false;
 	var markersToKeep = new Array();
-	for (var i = 0; i < markers.length; i++)
-	{
-		var marker = markers[i];
-		var regionListLength = regionList.length;
+	for (var i = 0; i < markers.length; i++) {
+        var marker = markers[i];
+        var regionListLength = regionList.length;
 
-
-		for(var j = 0; j < regionListLength; j++)
-		{
-			var region = regionList[j];
-			if (region.isActive && google.maps.geometry.poly.containsLocation(marker.getPosition(), region.polygon))
-			{
-				positionWithinBounds = true;
+		for(var j = 0; j < regionListLength; j++) {
+            
+            var region = regionList[j];
+            if (region.isActive && google.maps.geometry.poly.containsLocation(marker.getPosition(), region.polygon)) {
+                positionWithinBounds = true;
 				markersToKeep.push(marker);
 				break;
 			}
 		}
 	}
 
-	if (markersToKeep.length <= 0)
-	{
+	if (markersToKeep.length <= 0) {
 		alert("No results were found in the selected regions for the given search term.");
-	}
-	else{
-			setMarkers(markersToKeep);
+	} else {
+        setMarkers(markersToKeep);
 		centerMap(markersToKeep);
 		markers = markersToKeep;
 	}
 	
-	for (var i = 0; i < placeMarkerPairs.length; i++)
-	{
-		var found = false;
-		for (var j = 0; j <  markersToKeep.length; j++)
-		{
-			if (markersToKeep[j] == placeMarkerPairs[i].marker)
-			{
-				found = true;
+	for (var i = 0; i < placeMarkerPairs.length; i++) {
+        var found = false;
+		for (var j = 0; j <  markersToKeep.length; j++) {
+            
+            if (markersToKeep[j] == placeMarkerPairs[i].marker) {
+                found = true;
 				break;
 			}
 		}
-		if (!found)
-		{
+		
+        if (!found) {
 			placeMarkerPairs.splice(i,1);
 		}
 	}
 	
-	
-	setPlaceMarkerDetails();
-
-	
+	setPlaceMarkerDetails();	
 }
 
 /**Sets the markers that are currently on the map to have updated informatino based on their corresponding place.
 
 **/
 var succeeded = false;
-function setPlaceMarkerDetails()
-{
-	var interval = 2000;
-	for (var i = 0; i < placeMarkerPairs.length; i++)
-	{
-		var placeMarkerPair = placeMarkerPairs[i];
-		
-		var request = 
-		{
-			placeId: placeMarkerPair.place.place_id
-			
+function setPlaceMarkerDetails() {
+    
+    var interval = 2000;
+    
+    for (var i = 0; i < placeMarkerPairs.length; i++) {
+        
+        var placeMarkerPair = placeMarkerPairs[i];
+        
+        var request = {
+            placeId: placeMarkerPair.place.place_id			
 		};
 		
 		
-		var callback = function(place, status) 
-		{
-			
-
-			if (status != google.maps.places.PlacesServiceStatus.OK)
-			{
-				
-				//alert("reached here, resetting.");
-				
+		var callback = function(place, status) {
+            
+            if (status != google.maps.places.PlacesServiceStatus.OK) {
+                				
 				setTimeout(sendRequest, interval, request,callback);
 				interval = interval + 2000;
-				if (interval > 10000)
-				{
+				if (interval > 10000) {
 					interval = 2000;
 				}
 				return;
-
-			}
-			else if (status = google.maps.places.PlacesServiceStatus.OK) 
-			{
-				console.log(place);
+			} else if (status = google.maps.places.PlacesServiceStatus.OK) {
 				
-				for (var k = 0; k < placeMarkerPairs.length; k++)
-				{
-					if (placeMarkerPairs[k].place.place_id == place.place_id || placeMarkerPairs[k].place.id == place.id)
-					{
-						placeMarkerPair = placeMarkerPairs[k];
-					}
-				}
-				placeMarkerPair.marker.title = "Name: " + place.name + "\nAddress: " + place.formatted_address + "\nPhone Number: ";
-				
-				if (place.international_phone_number != null)
-				{
-					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPhone Number: " + place.international_phone_number;
+				for (var k = 0; k < placeMarkerPairs.length; k++) {
+                    
+                    if (placeMarkerPairs[k].place.place_id == place.place_id || placeMarkerPairs[k].place.id == place.id) {
+                        placeMarkerPair = placeMarkerPairs[k];
+                    }
 				}
 				
-				else if (place.formatted_phone_number != null)
-				{
-					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPhone Number: " + place.formatted_phone_number;
+                placeMarkerPair.marker.title = "Name: " + place.name + "\nAddress: " + place.formatted_address + "\nPhone Number: ";
+				
+				if (place.international_phone_number != null) {
+                    placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPhone Number: " + place.international_phone_number;
+                } else if (place.formatted_phone_number != null) {
+                    placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPhone Number: " + place.formatted_phone_number;
 				}
 				
-				if (place.website != null)
-				{
-					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nWebsite: " + place.website;
-				}
+				if (place.website != null) {
+                    placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nWebsite: " + place.website;
+                }
 				
-				if (place.photos != null)
-				{
+				if (place.photos != null) {
 					placeMarkerPair.marker.icon = place.photos[0].getUrl({'maxWidth': 35, 'maxHeight': 35});
 				}
 				
-				if (place.permanently_closed != null && place.permanently_closed)
-				{
+				if (place.permanently_closed != null && place.permanently_closed) {
 					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPermanently Closed.";
-				}
-				else if (place.opening_hours != null && place.opening_hours.open_now != null && place.opening_hours.open_now)
-				{
+				} else if (place.opening_hours != null && place.opening_hours.open_now != null && place.opening_hours.open_now) {
 					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nOpen Now";
 				}
 				
-				if (place.rating != null)
-				{
-					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nRating /5: " + place.rating;
+				if (place.rating != null) {
+                    placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nRating /5: " + place.rating;
+                }
+				
+				if (placeMarkerPair.place.price_level != null) {
+                    placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPrice Rating: " + placeMarkerPair.place.price_level;
 				}
-				
-				if (placeMarkerPair.place.price_level != null)
-				{
-					placeMarkerPair.marker.title = placeMarkerPair.marker.title + "\nPrice Rating: " + placeMarkerPair.place.price_level;
-				}
-				
-				
-				
+                
 				placeMarkerPair.marker.icon = place.icon
 			}
 		}
@@ -450,11 +379,11 @@ function setPlaceMarkerDetails()
 }
 
 /**Sends a placeDetails request to google.**/
-function sendRequest(request,callback)
-{
-	var service = new google.maps.places.PlacesService(map);
-		service.getDetails(request, callback);
+function sendRequest(request,callback) {
+    var service = new google.maps.places.PlacesService(map);
+    service.getDetails(request, callback);
 }
+
  /** Removes all markers from the map and clears the list of markers.
  */ 
 function clearMarkers() {
@@ -469,19 +398,17 @@ function clearMarkers() {
 
 /**Set all of the markers onto the map.
 @Param markersToSet ~ The markers to set onto the map.**/
-function setMarkers(markersToSet)
-{
-	for (var i = 0; i < markersToSet.length; i++)
-	{
-		markersToSet[i].setMap(map);
+function setMarkers(markersToSet) {
+    
+    for (var i = 0; i < markersToSet.length; i++) {
+        markersToSet[i].setMap(map);
 	}
 }
 
 
 /**Sets up the searchbox so that pressing enter initaties the search.
 Simply ensures that the enter button results in firing a search.**/
-function setupSearchBox()
-{
+function setupSearchBox() {
 
 	 // [START region_getplaces]
   // Listen for the event fired when the user selects an item from the
@@ -493,24 +420,22 @@ function setupSearchBox()
 }
 
 /**Edit the region with the given polygon.
-  @polygon -> The polygon  that was edited.
-  **/
-  function editRegionWithPolygon(polygon)
-  {
-	  var regionToEdit;
-	  for (var i = 0; i < regionList.length; i++)
-	  {
-		  if (regionList[i].polygon === polygon)
-		  {
-			  regionToEdit = regionList[i];
-			  break;
-		  }
-	  }
-	  if (regionToEdit == null)
-	  {
-		  alert("There is no region to edit.");
-		  return;
-	  }
+@polygon -> The polygon  that was edited.
+**/
+function editRegionWithPolygon(polygon) {
+    
+    var regionToEdit;
+    for (var i = 0; i < regionList.length; i++) {
+        if (regionList[i].polygon === polygon) {
+            regionToEdit = regionList[i];
+            break;
+        }
+    }
+    
+    if (regionToEdit == null) {
+        alert("There is no region to edit.");
+        return;
+    }
 	  
 	//grab the actual array of the region path.
 	var path = regionToEdit.polygon.getPath().getArray();
@@ -525,77 +450,50 @@ function setupSearchBox()
 	"&regionID=" + regionToEdit.id + 
 	"&polygonPath=" + polygonPath;
 	
-	var onSave = function(response)
-	{
-		//alert("Succeeded!");
-	}
+	var onSave = function(response) { }
 	
-	httpRequest("POST","php/editRegion.php",params,
+	httpRequest("POST","php/editRegion.php",params,                
 	function onSuccess(response) {
 		var jsonResponse = JSON.parse(response);
-		if (jsonResponse == null)
-		{
+		if (jsonResponse == null) {
 			alert("no response from json");
-		}
-		else if (jsonResponse.error != null)
-		{
+		} else if (jsonResponse.error != null) {
 			alert("Failed to save the region to the database with the following jsonResponse " + jsonResponse.error);
-		}
-		else
-		{
+		} else {
 			onSave(jsonResponse);
 		}
-	},
-		function onFailure() {
-			alert("Failed to save the region to the database. The HTTPRequest failed.");
-		}
-		
-	);
-	
-	 
-	  
+    },
+                function onFailure() {
+        alert("Failed to save the region to the database. The HTTPRequest failed.");
+    });
   }
   
-  /*
-             * Deletes the region using the given delete button element.
-             * @param region ~ The region to be deleted.
-			 @param removeRegion ~ boolean: Whether or not to remove the region from the regionList.
-			 */
-			function deleteRegion(regionID, removeRegion)
-			{
-
-				
-				httpRequest("POST", "php/deleteRegion.php", ("regionID=" + regionID), 
-				function onSuccess(response) {
-					if (response != null)
-					{
-						//states whether or not the region was deleted.
-						//alert(response);
-					}
-				}, 
-				function onFailure(response)
-				{
-					if (response!=null)
-					{
-						alert("The request failed for the following reasion:\n" + response);
-					}
-					else
-					{
-						alert("The request failed.");
-					}
-				});
-				
-				if (removeRegion)
-				{
-					for (var i = 0; i < regionList.length; i++)
-					{
-						if (regionList[i].id == regionID)
-						{
-							removeCurrentRegion(regionList[i]);
-						}
-				}
-				}
-
-
-			}
-			
+/*
+* Deletes the region using the given delete button element.
+* @param region ~ The region to be deleted.
+* @param removeRegion ~ boolean: Whether or not to remove the region from the regionList.
+*/
+function deleteRegion(regionID, removeRegion){
+    
+    httpRequest("POST", "php/deleteRegion.php", ("regionID=" + regionID), 
+                function onSuccess(response) {
+                    if (response != null) {
+                    //states whether or not the region was deleted.        
+                    }
+                }, 
+                function onFailure(response) {
+                    if (response!=null) {
+                        alert("The request failed for the following reasion:\n" + response);
+                    } else {
+                        alert("The request failed.");
+                    }
+                });
+    
+    if (removeRegion) {
+        for (var i = 0; i < regionList.length; i++) {
+            if (regionList[i].id == regionID) {
+                removeCurrentRegion(regionList[i]);
+            }
+        }
+    }
+}
