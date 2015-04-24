@@ -573,7 +573,6 @@
 
                 $('#save-region-modal').modal('toggle');
                 saveRegion(regionName, regionDescription);
-                //updateRegions();
             }
 
             // Starts drawing on the map
