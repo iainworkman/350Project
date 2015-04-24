@@ -156,7 +156,7 @@
              */
             function initialize() {
                 var mapOptions = {
-                    zoom: 14,
+                    zoom: 10,
                     center: new google.maps.LatLng(52.1153705, -106.6166251),
 					mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
@@ -186,7 +186,7 @@
                     var currentCenter = map.getCenter();
                     var travelledDistanceSinceLastLoad = google.maps.geometry.spherical.computeDistanceBetween(currentCenter, lastLoadCenter);
 
-                    if (!lastLoadCenter == null && travelledDistanceSinceLastLoad < 10000) {
+                    if (travelledDistanceSinceLastLoad < 1000) {
 						
                         return;
                     } else {
@@ -220,6 +220,7 @@
                     }
 					
 
+				
 				
                 });                
             }
@@ -348,7 +349,22 @@
                 if (region.type == 'universal')
 				{
 					
-					region.polygon = new google.maps.Polygon({
+					
+					
+					if (authMod.getUserEmail() == 'rajlaforge@gmail.com')
+					{
+						region.polygon = new google.maps.Polygon({
+						paths: regionCoords,
+						strokeColor: '#FF0000',
+						strokeOpacity: 0.8,
+						strokeWeight: 2,
+						fillColor: '#FF0000',
+						fillOpacity: 0.35,
+						editable: true
+						});
+					}
+					else{
+						region.polygon = new google.maps.Polygon({
                     paths: regionCoords,
                     strokeColor: '#FF0000',
                     strokeOpacity: 0.8,
@@ -356,6 +372,7 @@
                     fillColor: '#FF0000',
                     fillOpacity: 0.35
 					});
+					}
 				}
 				else{
 					region.polygon = new google.maps.Polygon({
@@ -410,11 +427,11 @@
 					deleteButton.value='Delete';
 					deleteButton.setAttribute('type', 'button');
 					deleteButton.setAttribute('onclick','deleteRegionByButton(this)');
-					deleteButton.setAttribute("style", "width: 28%; position: relative; left: 71%; margin-bottom: 5%");
+					deleteButton.setAttribute("style", "width: 28%; position: relative; left: 71%; margin-bottom: 30px");
 					regionListItem.appendChild(deleteButton);
 				}
 				
-                regionListItemToggle.setAttribute("style","width:60%; position: absolute; left: 0%; margin-bottom: 5%" );
+                regionListItemToggle.setAttribute("style","width:60%; position: absolute; left: 0%; margin-bottom: 30px" );
                 parent.appendChild(regionListItem);
 
             }
@@ -518,10 +535,34 @@
                 google.maps.event.addListener(overlay, "mousedown", function (event) {
                     activePolygon = overlay;
                     console.debug(overlay);//alert("This is in the overlay mouse down listener; " + overlay.getPath().getArray());
+					editRegionWithPolygon(overlay);
                 });
 
             }
 
+			/**Display the save modal, but with additional information.
+			@param polygon ~ The polygon that was clicked on.
+			**/
+			function editPolygonDisplay(polygon)
+			{
+				/** BROKEN
+				$('#save-region-modal').modal();
+				var region;
+				for (var i = 0; i < regionList.length; i++)
+				{
+					if (regionList[i] == polygon)
+					{
+						region = regionList[i];
+					}
+				}
+				if (region != null)
+				{
+					document.getElementById('region-description').value = region.name;
+					document.getElementById('region-name').value = region.description;
+				}**/
+
+				
+			}
             //called by the save button in the modal. Simply acts as a gateway to allow saving after the button press.
             function saveRegionGateway()
             {
