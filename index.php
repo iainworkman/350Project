@@ -220,7 +220,7 @@
                     }
 					
 
-					alert("overlay complete");
+				
                 });                
             }
             
@@ -497,13 +497,14 @@
 				
 			}
             
+
             //this will grab the coordinates from the drawing manager on mouse up.
             function overlayMouseUpListener(overlay) {
                 google.maps.event.addListener(overlay, "mouseup", function (event) {
                     activePolygon = overlay;
                     console.debug(overlay);
 					//Do this asynchronously after a certain amount of time so that the overlay object has its points updated before this is done.
-					setTimeout(function() {editRegionWithPolygon(overlay);}, 100);
+					setTimeout(function() {editRegionWithPolygon(overlay); $('img[src$="undo_poly.png"]').hide();}, 100);
 					//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
 					
 					
@@ -556,6 +557,8 @@
 
 			setupSearchBox();
             google.maps.event.addDomListener(window, 'load', initialize);
+			
+		
         </script>
         <!-- call to launch authentication script -->
         <script src="https://apis.google.com/js/client.js?onload=handleGoogleClientLoad"></script>

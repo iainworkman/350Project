@@ -513,22 +513,46 @@ function setupSearchBox()
 		  return;
 	  }
 	  
-	  //set up a temporary polygon to prevent the blinking appearance.
-		/**var tempPolygon = new google.maps.Polygon(
+	//grab the actual array of the region path.
+	var path = regionToEdit.polygon.getPath().getArray();
+	
+	//Stringify results in a json object. consisting of an array of coordinates ["k"] referring to latitude and ["D"] referring to longitude.
+	var polygonPath = JSON.stringify(path);
+
+	var params = "userID=" + authMod.getUserEmail() + 
+	"&type=" + regionToEdit.type + 
+	"&name=" + regionToEdit.name + 
+	"&description=" + regionToEdit.description + 
+	"&regionID=" + regionToEdit.id + 
+	"&polygonPath=" + polygonPath;
+	
+	var onSave = function(response)
+	{
+		//alert("Succeeded!");
+	}
+	
+	httpRequest("POST","php/editRegion.php",params,
+	function onSuccess(response) {
+		var jsonResponse = JSON.parse(response);
+		if (jsonResponse == null)
 		{
-					paths: regionToEdit.polygon.paths,
-                    strokeColor: regionToEdit.polygon.strokeColor,
-                    strokeOpacity: regionToEdit.polygon.strokeOpacity,
-                    strokeWeight: regionToEdit.polygon.strokeWeight,
-                    fillColor: regionToEdit.polygon.fillColor,
-					editable: regionToEdit.polygon.editable,
-                    fillOpacity: regionToEdit.polygon.fillOpacity
-		});
-		tempPolygon.setMap(map);
-		setTimeout(function(){tempPolygon.setMap(null)},5000);**/
-	  activePolygon = regionToEdit.polygon;
-	  deleteRegion(regionToEdit.id, true);
-	  saveRegion(regionToEdit.name, regionToEdit.description);
+			alert("no response from json");
+		}
+		else if (jsonResponse.error != null)
+		{
+			alert("Failed to save the region to the database with the following jsonResponse " + jsonResponse.error);
+		}
+		else
+		{
+			onSave(jsonResponse);
+		}
+	},
+		function onFailure() {
+			alert("Failed to save the region to the database. The HTTPRequest failed.");
+		}
+		
+	);
+	
 	 
 	  
   }
@@ -575,3 +599,4 @@ function setupSearchBox()
 
 
 			}
+			
