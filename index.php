@@ -397,16 +397,19 @@
                 }
 				
 				regionListItem.appendChild(regionListItemToggle);	
-				regionListItemToggle.setAttribute("style","width:60%; position: relative; float: left; margin-bottom: 30px" );
+				regionListItemToggle.setAttribute("style","width:70%; position: relative; float: left; margin-bottom: 10px; margin-left:3px");
 				if (addDeleteButton) {
 					var deleteButton = document.createElement('input');
 					deleteButton.setAttribute('class','btn btn-danger');
 					deleteButton.value='Delete';
 					deleteButton.setAttribute('type', 'button');
 					deleteButton.setAttribute('onclick','deleteRegionByButton(this)');
-					deleteButton.setAttribute("style", "width: 28%; position: relative; float: right; margin-bottom: 30px");
+					deleteButton.setAttribute("style", "width: 20%; position: relative; float: right; margin-bottom: 10px; margin-right:10px;");
+                    regionListItemToggle.setAttribute("style","width:70%; position: relative; float: left; margin-bottom: 10px; margin-left:3px");
 					regionListItem.appendChild(deleteButton);
-				}
+				} else {
+                    regionListItemToggle.setAttribute("style","width:95%; position: relative; float: left; margin-bottom: 10px; margin-left:3px");
+                }
 				
                 parent.appendChild(regionListItem);
 
