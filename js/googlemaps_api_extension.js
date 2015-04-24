@@ -163,7 +163,7 @@ else
 			
 			doLoad = true;
 			updateRegions();
-			region.getPolygon().setMap(map);
+			//region.getPolygon().setMap(map);
 			setTimeout(function() {
 			toggleRegion(document.getElementById(region.getRegionID()).childNodes[0]); region.getPolygon().setMap(null)}, 500);
 			
