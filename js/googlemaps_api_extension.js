@@ -163,8 +163,9 @@ else
 			
 			doLoad = true;
 			updateRegions();
+			region.getPolygon().setMap(map);
 			setTimeout(function() {
-			toggleRegion(document.getElementById(region.getRegionID()).childNodes[0]);}, 100);
+			toggleRegion(document.getElementById(region.getRegionID()).childNodes[0]); region.getPolygon().setMap(null)}, 500);
 			
 			
 		});
@@ -526,7 +527,7 @@ function setupSearchBox()
 		tempPolygon.setMap(map);
 		setTimeout(function(){tempPolygon.setMap(null)},5000);**/
 	  activePolygon = regionToEdit.polygon;
-	  deleteRegion(regionToEdit.id, false);
+	  deleteRegion(regionToEdit.id, true);
 	  saveRegion(regionToEdit.name, regionToEdit.description);
 	 
 	  
