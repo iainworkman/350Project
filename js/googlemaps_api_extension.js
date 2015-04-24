@@ -134,11 +134,21 @@ function removePolygon()
 function saveRegion(regionName,regionDescription)
 {
 		
-		//Make the region object. This is currently working with it being a universal region by default. Later there will need to be a way to
-		//get the user.
+		
         var currentUser = authMod.getUserEmail();
+		var type;
+if (authMod.getUserEmail() != 'rajlaforge@gmail.com')
+{
+	
+	type = 'personal';
+}	
+else
+{
+	
+	type = 'universal';
+}
 		//the active region is currently set in all of the listeners.
-		var region = new Region(activePolygon, currentUser, "personal");
+		var region = new Region(activePolygon, currentUser, type);
 		region.setName(regionName);
 		region.setDescription(regionDescription);
 		

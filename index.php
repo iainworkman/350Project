@@ -233,7 +233,7 @@
                 lastLoadCenter = map.getCenter();              
                 
                 var currentUserEmail;
-                if(authMod.isUserLoggedIn())
+                if(authMod.isUserLoggedIn() != 'rajlaforge@gmail.com')
                     currentUserEmail = authMod.getUserEmail()
                 else
                     currentUserEmail = "";
@@ -336,9 +336,11 @@
                 for(var iRegionCoord = 0; iRegionCoord < region.coordinates.length; ++iRegionCoord) {
                     regionCoords.push(new google.maps.LatLng(region.coordinates[iRegionCoord].latitude, region.coordinates[iRegionCoord].longitude));
                 }
-                if (authMod.getUserEmail() == "rajlaforge@gmail.com")
+				
+				
+                if (region.type == 'universal')
 				{
-					region.type = 'universal';
+					
 					region.polygon = new google.maps.Polygon({
                     paths: regionCoords,
                     strokeColor: '#FF0000',
@@ -351,10 +353,10 @@
 				else{
 					region.polygon = new google.maps.Polygon({
                     paths: regionCoords,
-                    strokeColor: GREEN,
+                    strokeColor: 'green',
                     strokeOpacity: 0.8,
                     strokeWeight: 2,
-                    fillColor: BLACK,
+                    fillColor: 'black',
 					editable: true,
                     fillOpacity: 0.35
 					});
