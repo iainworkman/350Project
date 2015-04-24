@@ -34,11 +34,11 @@
                     </li>
                     <li>
                         My Zones
-                        <ul id="userZonesList"></ul>
+                        <div id="userZonesList"></div>
                     </li>
                     <li>
                         Global Zones
-                        <ul id="globalZonesList"></ul>
+                        <div id="globalZonesList"></div>
                     </li>
                 </ul>
             </div> <!-- /#sidebar-wrapper -->
@@ -149,6 +149,7 @@
 				/** @type {HTMLInputElement} */(input));
 				
 			
+			
 			/**
              * A function which initializes the map in the page, and wires up all the required event. 
              * For now this centers the map on Saskatoon - in order to avoid requesting Geolocation positions. 
@@ -209,6 +210,7 @@
                         overlayMouseDownListener(event.overlay);
                         //console.debug(overlay);
                         //alert ("This is in the google map listener. " + event.overlay.getPath().getArray());
+						overlayMouseUpListener(event.overlay);
                         $('#save-region-modal').modal();
 
                     }
@@ -216,7 +218,9 @@
                     {
                         //alert("This was a position click");
                     }
+					
 
+					alert("overlay complete");
                 });                
             }
             
@@ -234,7 +238,7 @@
                 
                 var currentUserEmail;
                 if(authMod.isUserLoggedIn() != 'rajlaforge@gmail.com')
-                    currentUserEmail = authMod.getUserEmail()
+                    currentUserEmail = authMod.getUserEmail();
                 else
                     currentUserEmail = "";
                 
@@ -291,7 +295,10 @@
                         }
                     }
                     doLoad = true;
-                });                
+
+                }); 
+
+
             } 
 
             /** Function which removes all the required stuff for a region:
@@ -361,7 +368,9 @@
                     fillOpacity: 0.35
 					});
 				}
-
+				
+				overlayMouseUpListener(region.polygon);
+				overlayMouseDownListener(region.polygon);
                 
                 // Ensures that the isActive data exists for the region, and that it is false
                 region.isActive = false;
@@ -378,26 +387,36 @@
                 
                 var parent;
                 
-				//Note: We only wish to include delete buttons on user regions.
+				//Note: We only wish to include delete buttons on user regions, or global regions if the admin is logged in.
+				
+				var addDeleteButton = false;
                 if(region.type === "universal") {
 					parent = document.getElementById('globalZonesList');
-					regionListItem.appendChild(regionListItemToggle);	
+					if ( authMod.getUserEmail() == 'rajlaforge@gmail.com')
+					{
+						addDeleteButton = true;
+					}
                 } else {
-                    parent = document.getElementById('userZonesList');
+					parent = document.getElementById('userZonesList');
+					addDeleteButton = true;
+								
+                }
+				
+				regionListItem.appendChild(regionListItemToggle);	
+				if (addDeleteButton)
+				{
 					var deleteButton = document.createElement('input');
 					deleteButton.setAttribute('class','btn btn-danger');
 					deleteButton.value='Delete';
 					deleteButton.setAttribute('type', 'button');
-					deleteButton.setAttribute('onclick','deleteRegion(this)');
-					deleteButton.setAttribute("style", "width: 75%;");
-					regionListItem.appendChild(regionListItemToggle);
+					deleteButton.setAttribute('onclick','deleteRegionByButton(this)');
+					deleteButton.setAttribute("style", "width: 28%; position: relative; left: 71%; margin-bottom: 5%");
 					regionListItem.appendChild(deleteButton);
-
-					
-									
-                }
-                regionListItemToggle.setAttribute("style","width:75%;");
+				}
+				
+                regionListItemToggle.setAttribute("style","width:60%; position: absolute; left: 0%; margin-bottom: 5%" );
                 parent.appendChild(regionListItem);
+
             }
             
             /**
@@ -444,7 +463,7 @@
 
 					
                     if(currentRegion.id == regionId) {
-					
+						
                         currentRegion.isActive = !(currentRegion.isActive);
 					
                         if(currentRegion.isActive)
@@ -465,7 +484,7 @@
              * Deletes the region using the given delete button element.
              * @param listElement ~ The deleteButton element of the region to be deleted.
 			 */
-			function deleteRegion(listElement)
+			function deleteRegionByButton(listElement)
 			{
 				//The user pressed no.
 				if(!confirm("Are You Sure?"))
@@ -474,43 +493,20 @@
 			
 				var regionID = listElement.id;
 				
+				deleteRegion(regionID, true);
 				
-				httpRequest("POST", "php/deleteRegion.php", ("regionID=" + regionID), 
-				function onSuccess(response) {
-					if (response != null)
-					{
-						//states whether or not the region was deleted.
-						//alert(response);
-					}
-				}, 
-				function onFailure(response)
-				{
-					if (response!=null)
-					{
-						alert("The request failed for the following reasion:\n" + response);
-					}
-					else
-					{
-						alert("The request failed.");
-					}
-				});
-				
-				for (var i = 0; i < regionList.length; i++)
-				{
-					if (regionList[i].id == regionID)
-					{
-						removeCurrentRegion(regionList[i]);
-					}
-				}
-			//	listElement.parentNode.removeChild(listElement);
-
 			}
             
             //this will grab the coordinates from the drawing manager on mouse up.
             function overlayMouseUpListener(overlay) {
                 google.maps.event.addListener(overlay, "mouseup", function (event) {
                     activePolygon = overlay;
-                    console.debug(overlay);//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
+                    console.debug(overlay);
+					//Do this asynchronously after a certain amount of time so that the overlay object has its points updated before this is done.
+					setTimeout(function() {editRegionWithPolygon(overlay);}, 100);
+					//alert("This is in the overLay mouse up listener: " + overlay.getPath().getArray());
+					
+					
                 });
             }
 
@@ -522,6 +518,7 @@
                     activePolygon = overlay;
                     console.debug(overlay);//alert("This is in the overlay mouse down listener; " + overlay.getPath().getArray());
                 });
+
             }
 
             //called by the save button in the modal. Simply acts as a gateway to allow saving after the button press.

@@ -160,11 +160,15 @@ else
 
 			//This sets the region id of the newly saved region. The response from saveRegion.php is the new region id.
 			region.setID(results);
-			region.getPolygon().setMap(null);
+			
 			doLoad = true;
 			updateRegions();
+			setTimeout(function() {
+			toggleRegion(document.getElementById(region.getRegionID()).childNodes[0]);}, 100);
+			
 		});
 }
+
 
 /**Initiates the search. This is performed when the search button is pressed, or the enter key is pressed while the searchbox has focus.
 This is the documentation for a places search. 
@@ -487,3 +491,85 @@ function setupSearchBox()
   });
 }
 
+/**Edit the region with the given polygon.
+  @polygon -> The polygon  that was edited.
+  **/
+  function editRegionWithPolygon(polygon)
+  {
+	  var regionToEdit;
+	  for (var i = 0; i < regionList.length; i++)
+	  {
+		  if (regionList[i].polygon === polygon)
+		  {
+			  regionToEdit = regionList[i];
+			  break;
+		  }
+	  }
+	  if (regionToEdit == null)
+	  {
+		  alert("There is no region to edit.");
+		  return;
+	  }
+	  
+	  //set up a temporary polygon to prevent the blinking appearance.
+		var tempPolygon = new google.maps.polygon(
+		{
+			paths: regionToEdit.polygon.paths,
+                    strokeColor: regionToEdit.polygon.strokeColor,
+                    strokeOpacity: regionToEdit.polygon.strokeOpacity,
+                    strokeWeight: regionToEdit.polygon.strokeWeight,
+                    fillColor: regionToEdit.polygon.fillColor,
+					editable: regionToEdit.polygon.editable,
+                    fillOpacity: regionToEdit.polygon.fillOpacity
+		});
+		tempPolygon.setMap(map);
+		setTimeout(function(){tempPolygon.setMap(null)},5000);
+	  activePolygon = regionToEdit.polygon;
+	  deleteRegion(regionToEdit.id, false);
+	  saveRegion(regionToEdit.name, regionToEdit.description);
+	 
+	  
+  }
+  
+  /*
+             * Deletes the region using the given delete button element.
+             * @param region ~ The region to be deleted.
+			 @param removeRegion ~ boolean: Whether or not to remove the region from the regionList.
+			 */
+			function deleteRegion(regionID, removeRegion)
+			{
+
+				
+				httpRequest("POST", "php/deleteRegion.php", ("regionID=" + regionID), 
+				function onSuccess(response) {
+					if (response != null)
+					{
+						//states whether or not the region was deleted.
+						//alert(response);
+					}
+				}, 
+				function onFailure(response)
+				{
+					if (response!=null)
+					{
+						alert("The request failed for the following reasion:\n" + response);
+					}
+					else
+					{
+						alert("The request failed.");
+					}
+				});
+				
+				if (removeRegion)
+				{
+					for (var i = 0; i < regionList.length; i++)
+					{
+						if (regionList[i].id == regionID)
+						{
+							removeCurrentRegion(regionList[i]);
+						}
+				}
+				}
+
+
+			}
