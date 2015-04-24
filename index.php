@@ -336,15 +336,30 @@
                 for(var iRegionCoord = 0; iRegionCoord < region.coordinates.length; ++iRegionCoord) {
                     regionCoords.push(new google.maps.LatLng(region.coordinates[iRegionCoord].latitude, region.coordinates[iRegionCoord].longitude));
                 }
-                
-                region.polygon = new google.maps.Polygon({
+                if (authMod.getUserEmail() == "rajlaforge@gmail.com")
+				{
+					region.type = 'universal';
+					region.polygon = new google.maps.Polygon({
                     paths: regionCoords,
                     strokeColor: '#FF0000',
                     strokeOpacity: 0.8,
                     strokeWeight: 2,
                     fillColor: '#FF0000',
                     fillOpacity: 0.35
-                });
+					});
+				}
+				else{
+					region.polygon = new google.maps.Polygon({
+                    paths: regionCoords,
+                    strokeColor: GREEN,
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: BLACK,
+					editable: true,
+                    fillOpacity: 0.35
+					});
+				}
+
                 
                 // Ensures that the isActive data exists for the region, and that it is false
                 region.isActive = false;
