@@ -65,53 +65,15 @@ try {
 		//var_dump($polygonPath);
 	}
 	
-	
+    $regionID = $_POST['regionID'];
+	// Remove the current set of coordinates from the database
 	$statement = $db->prepare(
-	"DELETE FROM t_regions where reg_identifier = :regionID;");
-	$statement->bindParam(':regionID', $_POST['regionID'], PDO::PARAM_INT);
+	"DELETE FROM t_region_coordinates where reg_identifier = :regionID;");
+	$statement->bindParam(':regionID', $regionID, PDO::PARAM_INT);
 	$statement->execute();
 	
 	
-	//Insert the region into the region table.
-    $statement = $db->prepare(
-    "INSERT INTO t_regions(reg_identifier, reg_user_email, reg_name, reg_description, reg_type)
-    VALUES(
-	:regionID,
-    :userID,
-    :name,
-    :description,
-    :type);"
-    );
-	$statement->bindParam(':regionID', $_POST['regionID'], PDO::PARAM_INT);
-    $statement->bindParam(':userID', $_POST['userID'], PDO::PARAM_STR);
-    $statement->bindParam(':name', $_POST['name'], PDO::PARAM_STR);
-    $statement->bindParam(':description', $_POST['description'], PDO::PARAM_STR);
-    $statement->bindPAram(':type', $_POST['type'], PDO::PARAM_STR);
-
-    $statement->execute();
-    
-    //Find the RegionID for this region.
-	$statement = $db->prepare(
-    "SELECT 
-    reg_identifier 
-    FROM 
-    t_regions
-	ORDER BY
-	reg_identifier DESC
-	LIMIT 1
-    ;");
-
-    $statement->execute();
-    $result = $statement->fetchAll();
-	
-	//there should be only one
-	 foreach ($result as $row) {
-
-	 //update the regionID to be the latest one plus one.
-		$regionID = $row['reg_identifier'];
-	 }
-    
-    //Insert all of the coordinates into the region_coordinates table.
+	//Insert all of the coordinates into the region_coordinates table.
 	$statement = $db->prepare(
 	"INSERT INTO t_region_coordinates(reg_identifier, reg_latitude, reg_longitude, reg_order)
 		VALUES(
